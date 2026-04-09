@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="ru"><head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <title>FleetOS — territorytaxi CRM</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -51,6 +52,7 @@ tr:hover td{background:rgba(255,255,255,.02)}
     <div class="logo-ico">🚕</div>
     <div><div class="logo-n">FleetOS</div><div class="logo-s">territorytaxi · 276 водителей · 300 ТС · 09.04.2026</div></div>
   </div>
+  <button onclick="openModal()" style="background:rgba(99,102,241,.15);border:1px solid rgba(99,102,241,.4);color:#a5b4fc;padding:5px 12px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap">📂 Обновить данные</button>
   <div class="cb">⚡ 12 авто без ОСАГО</div>
 </div>
 <div class="nav">
@@ -312,6 +314,175 @@ function filterDebt(){
   document.querySelectorAll('#debtBody tr').forEach(row=>{
     row.style.display=!q||row.textContent.toLowerCase().includes(q)?'':'none';
   });
+}
+</script>
+
+<!-- Upload Modal -->
+<div id="uploadModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:999;align-items:center;justify-content:center">
+<div style="background:#0d1117;border:1px solid #1a1e2d;border-radius:16px;padding:28px;width:500px;max-width:95vw">
+  <h2 style="font-size:16px;font-weight:700;margin-bottom:6px;color:#dde1ef">📂 Обновить данные из 1С</h2>
+  <p style="font-size:13px;color:#666;margin-bottom:20px">Выгрузи файлы из 1С:Такси → загрузи сюда → данные обновятся мгновенно</p>
+  
+  <div id="zone1" style="border:2px dashed #1a1e2d;border-radius:12px;padding:24px;text-align:center;cursor:pointer;position:relative;margin-bottom:8px" ondragover="event.preventDefault();this.style.borderColor='#6366f1'" ondragleave="this.style.borderColor='#1a1e2d'" ondrop="dropFile(event,'drivers','zone1')">
+    <input type="file" accept=".xlsx,.xls,.mxl" style="position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%" onchange="loadFile(this,'drivers','zone1')">
+    <div style="font-size:26px;margin-bottom:8px">👤</div>
+    <div id="zone1-title" style="font-size:14px;font-weight:600;color:#dde1ef;margin-bottom:4px">Список водителей (MXL или XLSX)</div>
+    <div style="font-size:12px;color:#555">Водители → Сохранить в Excel</div>
+  </div>
+  <div id="status1" style="font-size:12px;min-height:18px;margin-bottom:10px;padding-left:4px"></div>
+
+  <div id="zone2" style="border:2px dashed #1a1e2d;border-radius:12px;padding:24px;text-align:center;cursor:pointer;position:relative;margin-bottom:8px" ondragover="event.preventDefault();this.style.borderColor='#6366f1'" ondragleave="this.style.borderColor='#1a1e2d'" ondrop="dropFile(event,'cars','zone2')">
+    <input type="file" accept=".xlsx,.xls" style="position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%" onchange="loadFile(this,'cars','zone2')">
+    <div style="font-size:26px;margin-bottom:8px">🚗</div>
+    <div id="zone2-title" style="font-size:14px;font-weight:600;color:#dde1ef;margin-bottom:4px">Список автомобилей (XLSX)</div>
+    <div style="font-size:12px;color:#555">Автопарк → Сохранить в Excel</div>
+  </div>
+  <div id="status2" style="font-size:12px;min-height:18px;margin-bottom:16px;padding-left:4px"></div>
+
+  <div style="display:flex;gap:8px;justify-content:flex-end">
+    <button onclick="closeModal()" style="padding:8px 18px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:none;background:#1a1e2d;color:#888">Отмена</button>
+    <button id="applyBtn" onclick="applyData()" disabled style="padding:8px 18px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:none;background:#6366f1;color:#fff;opacity:.4">Применить</button>
+  </div>
+</div>
+</div>
+
+<script>
+let _pendingDrivers = null, _pendingCars = null;
+
+function openModal(){
+  _pendingDrivers=null; _pendingCars=null;
+  document.getElementById('zone1').style.borderColor='#1a1e2d';
+  document.getElementById('zone1-title').textContent='Список водителей (MXL или XLSX)';
+  document.getElementById('zone1-title').style.color='#dde1ef';
+  document.getElementById('zone2').style.borderColor='#1a1e2d';
+  document.getElementById('zone2-title').textContent='Список автомобилей (XLSX)';
+  document.getElementById('zone2-title').style.color='#dde1ef';
+  document.getElementById('status1').textContent='';
+  document.getElementById('status2').textContent='';
+  document.getElementById('applyBtn').disabled=true;
+  document.getElementById('applyBtn').style.opacity='.4';
+  const m=document.getElementById('uploadModal');
+  m.style.display='flex';
+}
+function closeModal(){ document.getElementById('uploadModal').style.display='none'; }
+document.getElementById('uploadModal').addEventListener('click',function(e){if(e.target===this)closeModal();});
+
+function dropFile(e,type,zoneId){ e.preventDefault(); document.getElementById(zoneId).style.borderColor='#1a1e2d'; const f=e.dataTransfer.files[0]; if(f) processFile(f,type,zoneId); }
+function loadFile(input,type,zoneId){ if(input.files[0]) processFile(input.files[0],type,zoneId); }
+
+function processFile(file,type,zoneId){
+  const st=document.getElementById(zoneId==='zone1'?'status1':'status2');
+  const ti=document.getElementById(zoneId+'-title');
+  st.style.color='#f59e0b'; st.textContent='⏳ Читаем файл...';
+  const reader=new FileReader();
+  reader.onload=function(e){
+    try{
+      const wb=XLSX.read(e.target.result,{type:'array',cellDates:true});
+      const ws=wb.Sheets[wb.SheetNames[0]];
+      const rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
+      if(type==='drivers'){
+        const parsed=_parseDrivers(rows);
+        if(parsed.length>0){
+          _pendingDrivers=parsed;
+          document.getElementById(zoneId).style.borderColor='#22c55e';
+          ti.style.color='#22c55e'; ti.textContent='✓ '+file.name+' ('+parsed.length+' водителей)';
+          st.style.color='#22c55e'; st.textContent='✅ Найдено '+parsed.length+' водителей';
+        } else { st.style.color='#ef4444'; st.textContent='❌ Не удалось распознать — проверь формат файла'; }
+      } else {
+        const parsed=_parseCars(rows);
+        if(parsed.length>0){
+          _pendingCars=parsed;
+          document.getElementById(zoneId).style.borderColor='#22c55e';
+          ti.style.color='#22c55e'; ti.textContent='✓ '+file.name+' ('+parsed.length+' авто)';
+          st.style.color='#22c55e'; st.textContent='✅ Найдено '+parsed.length+' автомобилей';
+        } else { st.style.color='#ef4444'; st.textContent='❌ Не удалось распознать — проверь формат файла'; }
+      }
+      const ok=!!(_pendingDrivers||_pendingCars);
+      document.getElementById('applyBtn').disabled=!ok;
+      document.getElementById('applyBtn').style.opacity=ok?'1':'.4';
+    }catch(err){ st.style.color='#ef4444'; st.textContent='❌ Ошибка: '+err.message; }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function _parseDrivers(rows){
+  let hi=-1,nc=-1,pc=-1,tc=-1,rc=-1,pec=-1,fc=-1,dc=-1,tenc=-1,insc=-1,mc=-1,cc=-1,sc=-1;
+  for(let i=0;i<Math.min(rows.length,5);i++){
+    const r=rows[i];
+    for(let j=0;j<r.length;j++){
+      const v=String(r[j]).trim();
+      if(v==='Наименование'||v==='ФИО'){hi=i;nc=j;}
+      if(v==='Телефон')pc=j;
+      if(v==='Итого')tc=j;
+      if(v==='Долг аренда')rc=j;
+      if(v==='Пени')pec=j;
+      if(v==='Долг по штрафам')fc=j;
+      if(v==='Долг по повреждениям')dc=j;
+      if(v==='Стаж в парке')tenc=j;
+      if(v==='Дней с осмотра')insc=j;
+      if(v==='ТС модель')mc=j;
+      if(v==='ТС')cc=j;
+      if(v==='Статус')sc=j;
+    }
+    if(nc>=0)break;
+  }
+  if(nc<0)return[];
+  const pn=v=>{try{return Math.round(parseFloat(String(v||0).replace(/[\s ]/g,'').replace(',','.')));}catch{return 0;}};
+  const res=[];
+  for(let i=hi+1;i<rows.length;i++){
+    const r=rows[i];
+    const name=String(r[nc]||'').trim();
+    if(!name||name==='Наименование')continue;
+    const t=pn(r[tc]),ten=parseInt(r[tenc])||0;
+    let seg='stable';
+    if(t<-50000)seg='ballast';else if(t<-10000)seg='potential';else if(ten<30)seg='potential';else if(t>0)seg='star';
+    res.push({n:name,ph:String(r[pc]||'').trim(),c:String(r[cc]||'').split(' - ')[0].trim(),m:String(r[mc]||'').trim(),t,r:pn(r[rc]),pe:pn(r[pec]),f:pn(r[fc]),d:pn(r[dc]),ten,ins:parseInt(r[insc])||0,seg,stat:String(r[sc]||'').trim()});
+  }
+  return res;
+}
+
+function _parseCars(rows){
+  let hi=-1,pl=-1,dr=-1,st=-1,mo=-1,yr=-1,km=-1,ins=-1,os=-1,to=-1;
+  for(let i=0;i<Math.min(rows.length,5);i++){
+    const r=rows[i];
+    for(let j=0;j<r.length;j++){
+      const v=String(r[j]).trim();
+      if(v==='Гос номер'||v==='Гос. номер'){hi=i;pl=j;}
+      if(v==='Водитель')dr=j;
+      if(v==='Статус ТС'||v==='Статус')st=j;
+      if(v==='Модель')mo=j;
+      if(v==='Год выпуска')yr=j;
+      if(v==='Пробег')km=j;
+      if(v==='Дней с осмотра')ins=j;
+      if(v.includes('ОСАГО')&&v.includes('дата'))os=j;
+      if(v.includes('Техосмотр')&&v.includes('дата'))to=j;
+    }
+    if(pl>=0)break;
+  }
+  if(pl<0)return[];
+  const today=new Date(2026,3,9);
+  const SM={'На линии':'online','Тех. ремонт (Сервис)':'repair','Свободна':'free','Малярка':'paint','Тотал':'total','Мойка':'wash'};
+  function pd(v){if(!v||v==='')return null;if(v instanceof Date)return v;const s=String(v).trim();const m=s.match(/(\d{2})\.(\d{2})\.(\d{4})/);if(m)return new Date(m[3],m[2]-1,m[1]);return null;}
+  function dt(d){if(!d)return 9999;return Math.round((d-today)/86400000);}
+  const res=[];
+  for(let i=hi+1;i<rows.length;i++){
+    const r=rows[i];
+    const plate=String(r[pl]||'').trim();
+    if(!plate)continue;
+    const od=pd(os>=0?r[os]:null),td=pd(to>=0?r[to]:null);
+    const stRaw=String(r[st]||'').trim();
+    res.push({p:plate,d:String(r[dr]||'').trim(),st:SM[stRaw]||'other',stl:stRaw,m:String(r[mo]||'').trim(),y:String(r[yr]||'').replace('.0','').trim(),km:parseInt(r[km])||0,ins:parseInt(r[ins])||0,osago:od?od.toLocaleDateString('ru-RU'):'',od:dt(od),to:td?td.toLocaleDateString('ru-RU'):'',td:dt(td)});
+  }
+  return res;
+}
+
+function applyData(){
+  const now=new Date().toLocaleDateString('ru-RU')+' '+new Date().toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});
+  if(_pendingDrivers){ DRIVERS=_pendingDrivers; }
+  if(_pendingCars){ CARS=_pendingCars; }
+  UPDATED=now+' (загружено из файла)';
+  closeModal();
+  render();
 }
 </script>
 </body></html>
