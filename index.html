@@ -541,7 +541,111 @@ function applyData(){
   if(_pendingCars){ CARS=_pendingCars; }
   UPDATED=now+' (загружено из файла)';
   closeModal();
-  render();
+  // Обновляем все данные на странице
+  _refreshAll();
+}
+
+function _refreshAll(){
+  const D=DRIVERS, C=CARS;
+  const totalDebt=D.reduce((s,d)=>s+(d.t<0?d.t:0),0);
+  const rentDebt=D.reduce((s,d)=>s+(d.r<0?d.r:0),0);
+  const penDebt=D.reduce((s,d)=>s+(d.pe<0?d.pe:0),0);
+  const debtors=D.filter(d=>d.t<-100);
+  const online=C.filter(c=>c.st==='online').length;
+  const osagoExp=C.filter(c=>c.od<0&&c.od>-9000).length;
+  const toExp=C.filter(c=>c.td<0&&c.td>-9000).length;
+  const inspOvr=D.filter(d=>d.ins>30).length;
+  const segs={ballast:0,potential:0,stable:0,star:0};
+  D.forEach(d=>{if(segs[d.seg]!==undefined)segs[d.seg]++;});
+  const kpd=Math.round(online/C.length*100);
+  
+  function fmt(n){if(Math.abs(n)>=1000000)return(n/1000000).toFixed(1)+'М ₽';if(Math.abs(n)>=1000)return Math.round(n/1000)+'К ₽';return Math.round(n).toLocaleString('ru-RU')+' ₽';}
+  function ff(n){return(n<0?'-':'')+Math.abs(Math.round(n)).toLocaleString('ru-RU')+' ₽';}
+  function dl(d){if(d>9000)return'—';if(d<0)return'<span style="color:#ef4444;font-weight:700">Просрочено '+Math.abs(d)+'д</span>';if(d<=7)return'<span style="color:#ef4444;font-weight:700">'+d+'д!</span>';if(d<=30)return'<span style="color:#f59e0b;font-weight:600">'+d+'д</span>';return'<span style="color:#555">'+d+'д</span>';}
+  const SEG={ballast:{l:'Балласт',c:'#ef4444'},potential:{l:'Потенциал',c:'#6366f1'},stable:{l:'Стабильный',c:'#22c55e'},star:{l:'Звезда',c:'#f59e0b'}};
+  const ST={online:{l:'На линии',c:'#22c55e'},repair:{l:'Ремонт',c:'#ef4444'},paint:{l:'Малярка',c:'#f59e0b'},free:{l:'Свободна',c:'#6366f1'},total:{l:'Тотал',c:'#dc2626'},wash:{l:'Мойка',c:'#0ea5e9'},other:{l:'Иное',c:'#888'}};
+  function segB(s){const sg=SEG[s]||{l:s,c:'#888'};return'<span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px;background:'+sg.c+'22;color:'+sg.c+'">'+sg.l+'</span>';}
+  function stB(s){const st=ST[s]||ST.other;return'<span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px;background:'+st.c+'22;color:'+st.c+'">'+st.l+'</span>';}
+  
+  // Хедер
+  document.querySelector('.logo-s').textContent='territorytaxi · '+D.length+' водителей · '+C.length+' ТС · '+UPDATED.split(' ')[0];
+  const cb=document.querySelector('.cb');
+  if(cb)cb.textContent='⚡ '+(osagoExp+toExp>0?(osagoExp+toExp)+' проблем с доками':debtors.length+' должников');
+
+  // Метрики сводки
+  const m=document.querySelector('.g4');
+  if(m)m.innerHTML=[
+    {l:'Суммарный долг',v:fmt(Math.abs(totalDebt)),s:debtors.length+' водителей в минусе',c:'red'},
+    {l:'КПД парка',v:kpd+'%',s:online+' из '+C.length+' авто на линии',c:'grn'},
+    {l:'ОСАГО просрочено',v:osagoExp+'',s:'Ездят без страховки!',c:'red'},
+    {l:'Без осмотра >30д',v:inspOvr+'',s:'Юридический риск',c:'amb'},
+  ].map(x=>'<div class="met"><div class="ml">'+x.l+'</div><div class="mv '+x.c+'">'+x.v+'</div><div class="ms">'+x.s+'</div></div>').join('');
+
+  // Таблица должников
+  const debtBody=document.getElementById('debtBody');
+  if(debtBody){
+    const rows=debtors.sort((a,b)=>a.t-b.t);
+    debtBody.innerHTML=rows.map((d,i)=>'<tr><td style="padding:9px 8px;color:#555">'+(i+1)+'</td><td style="padding:9px 8px"><div style="font-weight:600">'+d.n+'</div><div style="font-size:11px;color:#555">'+d.ph+'</div></td><td style="padding:9px 8px;color:#ef4444;font-weight:700">'+ff(d.t)+'</td><td style="padding:9px 8px;color:'+(d.r<-5000?'#ef4444':'#666')+'">'+( d.r<0?ff(d.r):'—')+'</td><td style="padding:9px 8px;color:'+(d.pe<-5000?'#f59e0b':'#666')+'">'+( d.pe<0?ff(d.pe):'—')+'</td><td style="padding:9px 8px;color:'+(d.d<-5000?'#8b5cf6':'#666')+'">'+( d.d<0?ff(d.d):'—')+'</td><td style="padding:9px 8px;color:'+(d.f<-3000?'#6366f1':'#666')+'">'+( d.f<0?ff(d.f):'—')+'</td><td style="padding:9px 8px;font-size:11px;color:#777;font-family:monospace">'+( d.c||'—')+'</td><td style="padding:9px 8px">'+d.ten+'д</td><td style="padding:9px 8px">'+segB(d.seg)+'</td></tr>').join('');
+    const dt=document.getElementById('debt-title');
+    if(dt)dt.textContent='Должников: '+rows.length;
+    const df=document.getElementById('debt-footer');
+    if(df)df.textContent='Данные: '+UPDATED;
+  }
+
+  // Автопарк
+  const carBody=document.getElementById('carsBody');
+  if(carBody){
+    const rows=[...C].sort((a,b)=>Math.min(a.od<0?a.od:9999,a.td<0?a.td:9999)-Math.min(b.od<0?b.od:9999,b.td<0?b.td:9999));
+    carBody.innerHTML=rows.map(c=>'<tr style="border-bottom:1px solid #1a1e2d"><td style="padding:9px 8px;font-family:monospace;font-size:12px;font-weight:600;color:#dde1ef">'+c.p+'</td><td style="padding:9px 8px">'+stB(c.st)+'</td><td style="padding:9px 8px;font-size:13px">'+( c.m||'—')+'</td><td style="padding:9px 8px;font-size:12px;color:#888">'+( c.y||'—')+'</td><td style="padding:9px 8px;font-size:12px;color:#777">'+( c.d||'—')+'</td><td style="padding:9px 8px;font-size:12px">'+( c.km>0?c.km.toLocaleString('ru-RU')+' км':'—')+'</td><td style="padding:9px 8px;font-size:12px">'+( c.osago||'—')+'<br>'+dl(c.od)+'</td><td style="padding:9px 8px;font-size:12px">'+( c.to||'—')+'<br>'+dl(c.td)+'</td><td style="padding:9px 8px;font-size:12px;color:'+(c.ins>30?'#ef4444':'#555')+'">'+( c.ins>0?c.ins+'д':'✓')+'</td></tr>').join('');
+  }
+
+  // Алерты
+  const ac=document.getElementById('alertsCard');
+  if(ac){
+    const top5=debtors.sort((a,b)=>a.t-b.t).slice(0,5);
+    ac.innerHTML='<div class="st">🔴 Критические — сегодня</div>'+
+      (osagoExp?'<div class="al al-r"><div class="at">'+osagoExp+' авто с просроченным ОСАГО</div><div class="as">Открой вкладку Документы</div></div>':'')+
+      (toExp?'<div class="al al-r"><div class="at">'+toExp+' авто с истёкшим техосмотром</div><div class="as">Открой вкладку Документы</div></div>':'')+
+      top5.map(d=>'<div class="al al-r"><div class="at">'+d.n+' — '+ff(Math.abs(d.t))+'</div><div class="as">'+(d.r<0?'Аренда '+ff(Math.abs(d.r))+' · ':'')+( d.pe<0?'Пени '+ff(Math.abs(d.pe)):'')+'  Тел: '+d.ph+'</div></div>').join('')+
+      '<div class="st" style="margin-top:16px">🟡 Предупреждения</div>'+
+      (inspOvr?'<div class="al al-a"><div class="at">'+inspOvr+' водителей без медосмотра >30 дней</div><div class="as">Системная проблема.</div></div>':'')+
+      '<div class="al al-a"><div class="at">Пени: '+fmt(Math.abs(penDebt))+' накоплены по парку</div><div class="as">Растут каждый день.</div></div>'+
+      '<div class="updated">Данные: '+UPDATED+'</div>';
+  }
+
+  // Документы
+  _refreshDocs();
+  
+  console.log('✅ Данные обновлены:', D.length, 'водителей,', C.length, 'авто');
+}
+
+function _refreshDocs(){
+  const C=CARS;
+  const today=new Date(2026,3,9);
+  function dl(d){if(d>9000)return'—';if(d<0)return'<span style="color:#ef4444;font-weight:700">Просрочено '+Math.abs(d)+'д</span>';if(d<=7)return'<span style="color:#ef4444;font-weight:700">'+d+'д!</span>';if(d<=30)return'<span style="color:#f59e0b;font-weight:600">'+d+'д</span>';return'<span style="color:#555">'+d+'д</span>';}
+  
+  const oc=document.getElementById('osago-card');
+  if(oc){
+    const crit=[...C].filter(c=>c.od<60&&c.od>-9000).sort((a,b)=>a.od-b.od);
+    oc.innerHTML='<div class="st">🔴 ОСАГО — критические ('+crit.length+')</div>'+
+      (crit.length===0?'<div style="color:#555;font-size:13px">Всё в порядке ✓</div>':
+      crit.map(c=>'<div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid #1a1e2d;gap:8px"><div><div style="font-weight:600;font-family:monospace;font-size:13px">'+c.p+'</div><div style="font-size:11px;color:#666;margin-top:2px">'+c.m+' · '+(c.d||'нет водителя')+'</div></div><div style="text-align:right;flex-shrink:0"><div style="font-size:12px;color:#888">'+( c.osago||'—')+'</div>'+dl(c.od)+'</div></div>').join(''));
+  }
+  
+  const tc=document.getElementById('to-card');
+  if(tc){
+    const crit=[...C].filter(c=>c.td<60&&c.td>-9000).sort((a,b)=>a.td-b.td);
+    tc.innerHTML='<div class="st">🔴 Техосмотр — критические ('+crit.length+')</div>'+
+      (crit.length===0?'<div style="color:#555;font-size:13px">Всё в порядке ✓</div>':
+      crit.map(c=>'<div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid #1a1e2d;gap:8px"><div><div style="font-weight:600;font-family:monospace;font-size:13px">'+c.p+'</div><div style="font-size:11px;color:#666;margin-top:2px">'+c.m+' · '+(c.d||'нет водителя')+'</div></div><div style="text-align:right;flex-shrink:0"><div style="font-size:12px;color:#888">'+( c.to||'—')+'</div>'+dl(c.td)+'</div></div>').join(''));
+  }
+  
+  const totCard=document.getElementById('total-card');
+  if(totCard){
+    const tots=C.filter(c=>c.st==='total');
+    totCard.innerHTML='<div class="st">💀 Тотал — '+tots.length+' авто</div>'+
+      (tots.length===0?'<div style="color:#555">Нет</div>':'<div style="display:flex;flex-wrap:wrap;gap:10px">'+tots.map(c=>'<div style="background:#1a1e2d;border-radius:8px;padding:10px 14px"><div style="font-family:monospace;font-weight:700">'+c.p+'</div><div style="font-size:12px;color:#666;margin-top:3px">'+c.m+'</div><div style="font-size:11px;color:#ef4444;font-weight:600;margin-top:4px">ТОТАЛ</div></div>').join('')+'</div>');
+  }
 }
 </script>
 </body></html>
