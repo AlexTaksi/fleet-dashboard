@@ -61,6 +61,7 @@ tr:hover td{background:rgba(255,255,255,.02)}
   <button class="nb" onclick="show('docs',this)">Документы</button>
   <button class="nb" onclick="show('debt',this)">Должники</button>
   <button class="nb" onclick="show('alerts',this)">Алерты</button>
+  <button class="nb" onclick="show('dyn',this)">Динамика</button>
 </div>
 <div class="w">
 
@@ -344,6 +345,53 @@ function filterDebt(){
     <button id="applyBtn" onclick="applyData()" disabled style="padding:8px 18px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:none;background:#6366f1;color:#fff;opacity:.4">Применить</button>
   </div>
 </div>
+
+<!-- ДИНАМИКА -->
+<div id="t-dyn" style="display:none">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:12px">
+    <div>
+      <div style="font-size:14px;font-weight:600;color:#dde1ef">Динамика парка</div>
+      <div style="font-size:12px;color:#555;margin-top:2px">Снапшот сохраняется каждый раз при нажатии «Применить». До 90 дней истории.</div>
+    </div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap">
+      <button onclick="setDynMetric('debt',this)" class="dm-btn" style="font-size:12px;padding:5px 12px;border-radius:8px;border:1px solid rgba(99,102,241,.4);background:rgba(99,102,241,.15);color:#a5b4fc;cursor:pointer;font-weight:600">Дебиторка</button>
+      <button onclick="setDynMetric('debtors',this)" class="dm-btn" style="font-size:12px;padding:5px 12px;border-radius:8px;border:1px solid #1a1e2d;background:transparent;color:#555;cursor:pointer">Должников</button>
+      <button onclick="setDynMetric('kpd',this)" class="dm-btn" style="font-size:12px;padding:5px 12px;border-radius:8px;border:1px solid #1a1e2d;background:transparent;color:#555;cursor:pointer">КПД %</button>
+      <button onclick="setDynMetric('osago',this)" class="dm-btn" style="font-size:12px;padding:5px 12px;border-radius:8px;border:1px solid #1a1e2d;background:transparent;color:#555;cursor:pointer">ОСАГО</button>
+    </div>
+  </div>
+
+  <div id="dyn-cards" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px"></div>
+
+  <div class="card" style="margin-bottom:14px">
+    <div style="position:relative;width:100%;height:260px">
+      <canvas id="dynChart" role="img" aria-label="График динамики показателей таксопарка"></canvas>
+    </div>
+    <div id="dyn-legend" style="margin-top:10px;font-size:12px;color:#555"></div>
+  </div>
+
+  <div class="card" id="dyn-empty" style="display:none;text-align:center;padding:32px">
+    <div style="font-size:28px;margin-bottom:10px">📊</div>
+    <div style="font-size:14px;font-weight:600;color:#dde1ef;margin-bottom:6px">Пока нет данных для графика</div>
+    <div style="font-size:13px;color:#555">Загрузи файлы через «Обновить данные» → «Применить»<br>Первый снапшот сохранится автоматически</div>
+  </div>
+
+  <div class="card">
+    <div class="st">История снапшотов</div>
+    <div style="overflow-x:auto"><table id="dyn-table" style="width:100%;border-collapse:collapse">
+      <thead><tr>
+        <th style="font-size:11px;color:#555;text-align:left;padding:6px 8px;border-bottom:1px solid #1a1e2d;font-weight:500">Дата</th>
+        <th style="font-size:11px;color:#555;text-align:right;padding:6px 8px;border-bottom:1px solid #1a1e2d;font-weight:500">Дебиторка</th>
+        <th style="font-size:11px;color:#555;text-align:right;padding:6px 8px;border-bottom:1px solid #1a1e2d;font-weight:500">Должников</th>
+        <th style="font-size:11px;color:#555;text-align:right;padding:6px 8px;border-bottom:1px solid #1a1e2d;font-weight:500">КПД</th>
+        <th style="font-size:11px;color:#555;text-align:right;padding:6px 8px;border-bottom:1px solid #1a1e2d;font-weight:500">На линии</th>
+        <th style="font-size:11px;color:#555;text-align:right;padding:6px 8px;border-bottom:1px solid #1a1e2d;font-weight:500">ОСАГО !</th>
+        <th style="font-size:11px;color:#555;text-align:right;padding:6px 8px;border-bottom:1px solid #1a1e2d;font-weight:500">Без осмотра</th>
+      </tr></thead>
+      <tbody id="dyn-tbody"></tbody>
+    </table></div>
+  </div>
+</div>
 </div>
 
 <script>
@@ -541,7 +589,7 @@ function applyData(){
   if(_pendingCars){ CARS=_pendingCars; }
   UPDATED=now+' (загружено из файла)';
   closeModal();
-  // Обновляем все данные на странице
+  _saveSnap();
   _refreshAll();
 }
 
@@ -648,4 +696,165 @@ function _refreshDocs(){
   }
 }
 </script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+// ═══════ ДИНАМИКА / СНАПШОТЫ ═══════
+const SNAP_KEY = 'fleetos_snapshots_v1';
+let _dynChart = null;
+let _dynMetric = 'debt';
+
+function _getSnaps(){ try{ return JSON.parse(localStorage.getItem(SNAP_KEY)||'[]'); }catch{ return []; } }
+
+function _saveSnap(){
+  const D=DRIVERS, C=CARS;
+  if(!D.length) return;
+  const today = new Date().toISOString().slice(0,10);
+  const snaps = _getSnaps();
+  const idx = snaps.findIndex(s=>s.date===today);
+  const totalDebt = D.reduce((s,d)=>s+(d.t<0?d.t:0),0);
+  const snap = {
+    date: today,
+    debt: totalDebt,
+    debtors: D.filter(d=>d.t<-100).length,
+    online: C.filter(c=>c.st==='online').length,
+    total: C.length,
+    kpd: Math.round(C.filter(c=>c.st==='online').length/C.length*100),
+    osago: C.filter(c=>c.od<0&&c.od>-9000).length,
+    toExp: C.filter(c=>c.td<0&&c.td>-9000).length,
+    insp: D.filter(d=>d.ins>30).length,
+    segs: {ballast:D.filter(d=>d.seg==='ballast').length, potential:D.filter(d=>d.seg==='potential').length, stable:D.filter(d=>d.seg==='stable').length, star:D.filter(d=>d.seg==='star').length},
+    ts: Date.now()
+  };
+  if(idx>=0) snaps[idx]=snap; else snaps.push(snap);
+  snaps.sort((a,b)=>a.date.localeCompare(b.date));
+  localStorage.setItem(SNAP_KEY, JSON.stringify(snaps.slice(-90)));
+  console.log('Снапшот сохранён:', today, snap);
+}
+
+function _fmtDebt(n){const a=Math.abs(n);if(a>=1000000)return(n/1000000).toFixed(1)+'М ₽';if(a>=1000)return Math.round(n/1000)+'К ₽';return Math.round(n)+' ₽';}
+function _fmtDate(d){const p=d.split('-');return p[2]+'.'+p[1];}
+
+const _MCONF = {
+  debt:    {label:'Дебиторка',     color:'#ef4444', key:s=>Math.abs(s.debt),   fmt:v=>_fmtDebt(-v)},
+  debtors: {label:'Должников',     color:'#f59e0b', key:s=>s.debtors,          fmt:v=>v+' чел.'},
+  kpd:     {label:'КПД %',         color:'#22c55e', key:s=>s.kpd,              fmt:v=>v+'%'},
+  osago:   {label:'ОСАГО просроч.',color:'#8b5cf6', key:s=>s.osago,            fmt:v=>v+' авто'},
+};
+
+function setDynMetric(m, btn){
+  _dynMetric = m;
+  document.querySelectorAll('.dm-btn').forEach(b=>{
+    b.style.background='transparent'; b.style.color='#555'; b.style.borderColor='#1a1e2d';
+  });
+  if(btn){ btn.style.background='rgba(99,102,241,.15)'; btn.style.color='#a5b4fc'; btn.style.borderColor='rgba(99,102,241,.4)'; }
+  _renderDyn();
+}
+
+function _renderDynCards(snaps){
+  if(!snaps.length){ document.getElementById('dyn-cards').innerHTML=''; return; }
+  const last=snaps[snaps.length-1], prev=snaps.length>1?snaps[snaps.length-2]:null;
+  function chg(key, inv){
+    if(!prev) return '';
+    const d=last[key]-prev[key]; if(d===0) return '<span style="color:#444">→</span>';
+    const up=d>0; const arr=up?'↑':'↓';
+    const col=inv?(up?'#ef4444':'#22c55e'):(up?'#22c55e':'#ef4444');
+    const val=key==='debt'?_fmtDebt(Math.abs(d)):key==='kpd'?Math.abs(d)+'%':Math.abs(d);
+    return '<span style="color:'+col+'">'+arr+' '+val+'</span>';
+  }
+  document.getElementById('dyn-cards').innerHTML=[
+    {l:'Дебиторка',   v:_fmtDebt(last.debt),    d:chg('debt',true)},
+    {l:'Должников',   v:last.debtors+' чел.',   d:chg('debtors',true)},
+    {l:'КПД парка',   v:last.kpd+'%',           d:chg('kpd',false)},
+    {l:'ОСАГО просроч.',v:last.osago+' авто',   d:chg('osago',true)},
+  ].map(c=>'<div class="met"><div class="ml">'+c.l+'</div><div class="mv">'+c.v+'</div><div class="ms" style="min-height:16px">'+c.d+'</div></div>').join('');
+}
+
+function _renderDynTable(snaps){
+  const rows=[...snaps].reverse().slice(0,60);
+  document.getElementById('dyn-tbody').innerHTML=rows.map((s,i)=>{
+    const p=rows[i+1];
+    function d(key,inv){
+      if(!p)return'';const diff=s[key]-p[key];if(diff===0)return'';
+      const up=diff>0;const c=inv?(up?'#ef4444':'#22c55e'):(up?'#22c55e':'#ef4444');
+      return' <span style="color:'+c+';font-size:10px">'+(up?'↑':'↓')+Math.abs(diff)+'</span>';
+    }
+    return '<tr style="border-bottom:1px solid #111520">'+
+      '<td style="padding:8px;color:#dde1ef">'+s.date.split('-').reverse().join('.')+'</td>'+
+      '<td style="padding:8px;text-align:right;color:#ef4444">'+_fmtDebt(s.debt)+d('debt',true)+'</td>'+
+      '<td style="padding:8px;text-align:right;color:#dde1ef">'+s.debtors+d('debtors',true)+'</td>'+
+      '<td style="padding:8px;text-align:right;color:#22c55e">'+s.kpd+'%'+d('kpd',false)+'</td>'+
+      '<td style="padding:8px;text-align:right;color:#dde1ef">'+s.online+d('online',false)+'</td>'+
+      '<td style="padding:8px;text-align:right;color:'+(s.osago>0?'#ef4444':'#22c55e')+'">'+s.osago+d('osago',true)+'</td>'+
+      '<td style="padding:8px;text-align:right;color:'+(s.insp>150?'#ef4444':'#f59e0b')+'">'+s.insp+'</td>'+
+    '</tr>';
+  }).join('');
+}
+
+function _renderDyn(){
+  const snaps=_getSnaps();
+  const empty=document.getElementById('dyn-empty');
+  const canvas=document.getElementById('dynChart');
+  if(!canvas) return;
+
+  if(!snaps.length){
+    empty.style.display=''; canvas.parentElement.style.display='none'; return;
+  }
+  empty.style.display='none'; canvas.parentElement.style.display='';
+
+  _renderDynCards(snaps);
+
+  const m=_MCONF[_dynMetric];
+  const labels=snaps.map(s=>_fmtDate(s.date));
+  const values=snaps.map(s=>m.key(s));
+
+  if(_dynChart) _dynChart.destroy();
+  _dynChart=new Chart(canvas,{
+    type:'line',
+    data:{
+      labels,
+      datasets:[{
+        label:m.label, data:values,
+        borderColor:m.color, backgroundColor:m.color+'18',
+        borderWidth:2, pointRadius:snaps.length===1?6:4,
+        pointHoverRadius:7, pointBackgroundColor:m.color,
+        tension:0.35, fill:true
+      }]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{
+        legend:{display:false},
+        tooltip:{callbacks:{
+          label:ctx=>m.fmt(ctx.raw),
+          title:ctx=>snaps[ctx[0].dataIndex]?.date.split('-').reverse().join('.')||ctx[0].label
+        }}
+      },
+      scales:{
+        x:{grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'#555',font:{size:11},maxRotation:45,autoSkip:snaps.length>20}},
+        y:{grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'#555',font:{size:11},callback:v=>{
+          if(_dynMetric==='debt')return Math.abs(v)>=1000?Math.round(v/1000)+'К':v;
+          if(_dynMetric==='kpd')return v+'%';
+          return v;
+        }}}
+      }
+    }
+  });
+
+  document.getElementById('dyn-legend').innerHTML=
+    '<span style="display:inline-flex;align-items:center;gap:6px">'+
+    '<span style="width:12px;height:3px;background:'+m.color+';border-radius:2px;display:inline-block"></span>'+
+    m.label+'</span>';
+
+  _renderDynTable(snaps);
+}
+
+// Переопределяем show чтобы рендерить динамику при переходе на вкладку
+const _origShow = show;
+window.show = function(id, btn){
+  _origShow(id, btn);
+  if(id==='dyn') _renderDyn();
+};
+</script>
+
 </body></html>
