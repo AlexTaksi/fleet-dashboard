@@ -406,14 +406,15 @@ function processFile(file,type,zoneId){
 }
 
 function _parseDrivers(rows){
-  let hi=-1,nc=-1,pc=-1,tc=-1,rc=-1,pec=-1,fc=-1,dc=-1,tenc=-1,insc=-1,mc=-1,cc=-1,sc=-1;
+  // Ищем строку с заголовками
+  let hi=-1,nc=-1,pc=-1,tc=-1,tc2=-1,rc=-1,pec=-1,fc=-1,dc=-1,tenc=-1,insc=-1,mc=-1,cc=-1,sc=-1;
   for(let i=0;i<Math.min(rows.length,5);i++){
     const r=rows[i];
     for(let j=0;j<r.length;j++){
-      const v=String(r[j]).trim();
+      const v=String(r[j]||'').trim();
       if(v==='Наименование'||v==='ФИО'){hi=i;nc=j;}
-      if(v==='Телефон')pc=j;
-      if(v==='Итого')tc=j;
+      if(v==='Телефон'&&pc<0)pc=j;
+      if(v==='Итого'){if(tc<0)tc=j;else tc2=j;} // берём второй Итого
       if(v==='Долг аренда')rc=j;
       if(v==='Пени')pec=j;
       if(v==='Долг по штрафам')fc=j;
@@ -421,57 +422,115 @@ function _parseDrivers(rows){
       if(v==='Стаж в парке')tenc=j;
       if(v==='Дней с осмотра')insc=j;
       if(v==='ТС модель')mc=j;
-      if(v==='ТС')cc=j;
+      if(v==='ТС'&&cc<0)cc=j;
       if(v==='Статус')sc=j;
     }
     if(nc>=0)break;
   }
   if(nc<0)return[];
-  const pn=v=>{try{return Math.round(parseFloat(String(v||0).replace(/[\s ]/g,'').replace(',','.')));}catch{return 0;}};
+  // Если есть второй Итого — используем его (баланс без агрегаторов)
+  const totalCol = tc2>=0 ? tc2 : tc;
+  const pn=v=>{
+    try{
+      const s=String(v||'').trim();
+      if(s===''||s==='nan'||s==='---')return 0;
+      return Math.round(parseFloat(s.replace(/[\s\u00a0]/g,'').replace(',','.')));
+    }catch{return 0;}
+  };
   const res=[];
+  // Данные начинаются через строку после заголовков (строка hi+1 обычно пустая)
   for(let i=hi+1;i<rows.length;i++){
     const r=rows[i];
     const name=String(r[nc]||'').trim();
-    if(!name||name==='Наименование')continue;
-    const t=pn(r[tc]),ten=parseInt(r[tenc])||0;
+    if(!name||name==='nan'||name==='Наименование')continue;
+    const t=pn(r[totalCol]),ten=parseInt(r[tenc])||0;
     let seg='stable';
     if(t<-50000)seg='ballast';else if(t<-10000)seg='potential';else if(ten<30)seg='potential';else if(t>0)seg='star';
-    res.push({n:name,ph:String(r[pc]||'').trim(),c:String(r[cc]||'').split(' - ')[0].trim(),m:String(r[mc]||'').trim(),t,r:pn(r[rc]),pe:pn(r[pec]),f:pn(r[fc]),d:pn(r[dc]),ten,ins:parseInt(r[insc])||0,seg,stat:String(r[sc]||'').trim()});
+    res.push({
+      n:name,ph:String(r[pc]||'').trim(),
+      c:String(r[cc]||'').split(' - ')[0].trim(),
+      m:String(r[mc]||'').trim(),
+      t,r:pn(r[rc]),pe:pn(r[pec]),f:pn(r[fc]),d:pn(r[dc]),
+      ten,ins:parseInt(r[insc])||0,seg,stat:String(r[sc]||'').trim()
+    });
   }
   return res;
 }
 
 function _parseCars(rows){
+  // Двухуровневые заголовки: row 0 = группа, row 1 = подзаголовок
+  // Фиксированные индексы для стандартного экспорта 1С:Такси
   let hi=-1,pl=-1,dr=-1,st=-1,mo=-1,yr=-1,km=-1,ins=-1,os=-1,to=-1;
+  
+  // Ищем строку с "Гос номер"
   for(let i=0;i<Math.min(rows.length,5);i++){
     const r=rows[i];
     for(let j=0;j<r.length;j++){
-      const v=String(r[j]).trim();
+      const v=String(r[j]||'').trim();
       if(v==='Гос номер'||v==='Гос. номер'){hi=i;pl=j;}
-      if(v==='Водитель')dr=j;
+      if(v==='Водитель'&&dr<0)dr=j;
       if(v==='Статус ТС'||v==='Статус')st=j;
       if(v==='Модель')mo=j;
       if(v==='Год выпуска')yr=j;
       if(v==='Пробег')km=j;
-      if(v==='Дней с осмотра')ins=j;
-      if(v.includes('ОСАГО')&&v.includes('дата'))os=j;
-      if(v.includes('Техосмотр')&&v.includes('дата'))to=j;
+      if(v==='Дней с осмотра'&&ins<0)ins=j;
     }
     if(pl>=0)break;
   }
   if(pl<0)return[];
+  
+  // Ищем ОСАГО и ТО в подзаголовках (следующая строка после hi)
+  if(hi>=0&&hi+1<rows.length){
+    const subRow=rows[hi+1];
+    let lastGroup='';
+    const groupRow=rows[hi];
+    for(let j=0;j<subRow.length;j++){
+      const g=String(groupRow[j]||'').trim();
+      const s=String(subRow[j]||'').trim();
+      if(g)lastGroup=g;
+      // ОСАГО "Действителен до"
+      if((lastGroup==='ОСАГО'||g==='ОСАГО')&&s.includes('Действителен до')&&os<0)os=j;
+      // Техосмотр "Действителен до"  
+      if((lastGroup==='Техосмотр'||g==='Техосмотр')&&s.includes('Действителен до')&&to<0)to=j;
+    }
+  }
+  
   const today=new Date(2026,3,9);
   const SM={'На линии':'online','Тех. ремонт (Сервис)':'repair','Свободна':'free','Малярка':'paint','Тотал':'total','Мойка':'wash'};
-  function pd(v){if(!v||v==='')return null;if(v instanceof Date)return v;const s=String(v).trim();const m=s.match(/(\d{2})\.(\d{2})\.(\d{4})/);if(m)return new Date(m[3],m[2]-1,m[1]);return null;}
+  
+  function pd(v){
+    if(!v)return null;
+    const s=String(v).trim();
+    if(s===''||s==='nan'||s==='---')return null;
+    if(v instanceof Date)return v;
+    const m=s.match(/(\d{2})\.(\d{2})\.(\d{4})/);
+    if(m)return new Date(parseInt(m[3]),parseInt(m[2])-1,parseInt(m[1]));
+    return null;
+  }
   function dt(d){if(!d)return 9999;return Math.round((d-today)/86400000);}
+  function si(v){try{const s=String(v||'').trim();if(s===''||s==='nan'||s==='---')return 0;return parseInt(parseFloat(s))||0;}catch{return 0;}}
+  
+  // Данные начинаются через 2 строки после первой строки заголовков (hi+1 — подзаголовки, hi+2 — данные)
+  const dataStart = (hi+1<rows.length && rows[hi+1].some(v=>String(v||'').trim()!==''&&!String(v||'').includes('до'))) ? hi+1 : hi+2;
+  
   const res=[];
-  for(let i=hi+1;i<rows.length;i++){
+  for(let i=dataStart;i<rows.length;i++){
     const r=rows[i];
     const plate=String(r[pl]||'').trim();
-    if(!plate)continue;
-    const od=pd(os>=0?r[os]:null),td=pd(to>=0?r[to]:null);
+    if(!plate||plate==='nan')continue;
+    const od=pd(os>=0?r[os]:null);
+    const td=pd(to>=0?r[to]:null);
     const stRaw=String(r[st]||'').trim();
-    res.push({p:plate,d:String(r[dr]||'').trim(),st:SM[stRaw]||'other',stl:stRaw,m:String(r[mo]||'').trim(),y:String(r[yr]||'').replace('.0','').trim(),km:parseInt(r[km])||0,ins:parseInt(r[ins])||0,osago:od?od.toLocaleDateString('ru-RU'):'',od:dt(od),to:td?td.toLocaleDateString('ru-RU'):'',td:dt(td)});
+    res.push({
+      p:plate,
+      d:String(r[dr]||'').trim().replace('nan',''),
+      st:SM[stRaw]||'other',stl:stRaw,
+      m:String(r[mo]||'').trim().replace('nan',''),
+      y:String(r[yr]||'').replace('.0','').trim().replace('nan',''),
+      km:si(r[km]),ins:si(r[ins]),
+      osago:od?od.toLocaleDateString('ru-RU'):'',od:dt(od),
+      to:td?td.toLocaleDateString('ru-RU'):'',td:dt(td)
+    });
   }
   return res;
 }
