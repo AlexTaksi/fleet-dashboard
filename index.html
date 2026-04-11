@@ -62,49 +62,30 @@ tr:hover td{background:rgba(255,255,255,.02)}
   <button class="nb" onclick="show('debt',this)">Должники</button>
   <button class="nb" onclick="show('alerts',this)">Алерты</button>
   <button class="nb" onclick="show('dyn',this)">Динамика</button>
+  <button class="nb" onclick="show('mgr',this)">Менеджеры</button>
 </div>
 <div class="w">
 
+<!-- ЭКРАН ЗАГРУЗКИ -->
+<div id="t-welcome" style="display:none;text-align:center;padding:60px 20px">
+  <div style="font-size:48px;margin-bottom:16px">🚕</div>
+  <div style="font-size:18px;font-weight:700;color:#dde1ef;margin-bottom:8px">Добро пожаловать в FleetOS</div>
+  <div style="font-size:14px;color:#555;margin-bottom:28px">Загрузи данные из 1С:Такси чтобы начать</div>
+  <button onclick="openModal()" style="background:#6366f1;color:#fff;border:none;padding:12px 28px;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer">📂 Загрузить данные</button>
+  <div style="margin-top:20px;font-size:12px;color:#444">
+    Водители → Сохранить в Excel &nbsp;·&nbsp; Автопарк → Сохранить в Excel
+  </div>
+</div>
+
 <!-- СВОДКА -->
 <div id="t-dash">
-  <div class="g4">
-    <div class="met"><div class="ml">Суммарный долг</div><div class="mv red">2.2М ₽</div><div class="ms">24 водителей в минусе</div></div>
-    <div class="met"><div class="ml">КПД парка</div><div class="mv grn">85%</div><div class="ms">256 из 300 авто на линии</div></div>
-    <div class="met"><div class="ml">ОСАГО просрочено</div><div class="mv red">12</div><div class="ms">Ездят без страховки!</div></div>
-    <div class="met"><div class="ml">Без осмотра &gt;30д</div><div class="mv amb">181</div><div class="ms">Юридический риск</div></div>
-  </div>
-  <div class="g4" style="margin-bottom:16px">
-    <div class="met"><div class="ml">Техосмотр истёк</div><div class="mv red">7</div><div class="ms">Нарушение ПДД</div></div>
-    <div class="met"><div class="ml">В ремонте</div><div class="mv amb">13</div><div class="ms">+ 10 малярка + 5 мойка</div></div>
-    <div class="met"><div class="ml">Тотал (гибель)</div><div class="mv red">6</div><div class="ms">Страховые случаи</div></div>
-    <div class="met"><div class="ml">Ветераны &gt;1 года</div><div class="mv grn">124</div><div class="ms">Костяк парка</div></div>
-  </div>
-  <div class="g2">
-    <div class="card">
-      <div class="st">Сегменты водителей (276)</div>
-      <div class="br"><span class="bt"><span class="dot" style="background:#ef4444"></span>Балласт</span><div class="bk"><div class="bf" style="width:3%;background:#ef4444"></div></div><span class="bv red">9</span></div>
-      <div class="br"><span class="bt"><span class="dot" style="background:#6366f1"></span>Потенциал</span><div class="bk"><div class="bf" style="width:20%;background:#6366f1"></div></div><span class="bv blu">54</span></div>
-      <div class="br"><span class="bt"><span class="dot" style="background:#22c55e"></span>Стабильный</span><div class="bk"><div class="bf" style="width:59%;background:#22c55e"></div></div><span class="bv grn">163</span></div>
-      <div class="br"><span class="bt"><span class="dot" style="background:#f59e0b"></span>Звезда</span><div class="bk"><div class="bf" style="width:18%;background:#f59e0b"></div></div><span class="bv amb">50</span></div>
-    </div>
-    <div class="card">
-      <div class="st">Статус парка (300 ТС)</div>
-      <div class="br"><span class="bt"><span class="dot" style="background:#22c55e"></span>На линии</span><div class="bk"><div class="bf" style="width:85%;background:#22c55e"></div></div><span class="bv grn">256</span></div>
-      <div class="br"><span class="bt"><span class="dot" style="background:#ef4444"></span>Ремонт</span><div class="bk"><div class="bf" style="width:4%;background:#ef4444"></div></div><span class="bv red">13</span></div>
-      <div class="br"><span class="bt"><span class="dot" style="background:#f59e0b"></span>Малярка</span><div class="bk"><div class="bf" style="width:3%;background:#f59e0b"></div></div><span class="bv amb">10</span></div>
-      <div class="br"><span class="bt"><span class="dot" style="background:#6366f1"></span>Свободна</span><div class="bk"><div class="bf" style="width:3%;background:#6366f1"></div></div><span class="bv blu">10</span></div>
-      <div class="br"><span class="bt"><span class="dot" style="background:#dc2626"></span>Тотал</span><div class="bk"><div class="bf" style="width:2%;background:#dc2626"></div></div><span class="bv red">6</span></div>
-      <div class="status-bar"><div style="width:85.3%;background:#22c55e"></div><div style="width:4.3%;background:#ef4444"></div><div style="width:3.3%;background:#f59e0b"></div><div style="width:3.3%;background:#6366f1"></div><div style="width:2%;background:#dc2626"></div><div style="flex:1;background:#0ea5e9"></div></div>
-    </div>
-  </div>
-  <div class="card" style="margin-top:0">
+  <div class="g4" id="metrics-grid"></div>
+  <div class="g4" id="metrics-grid2"></div>
+  <div class="g2" id="seg-fleet-grid"></div>
+  <div class="card" style="margin-top:0" id="crit-card">
     <div class="st">🔴 Критические — сегодня</div>
-    <div class="al al-r"><div class="at">12 авто с просроченным ОСАГО — выезд запрещён</div><div class="as">4 Москвича (с сент. 2023!), 7 Haval Jolion (с марта 2024), 2 Granta, Chery. Штраф + риск при ДТП.</div></div>
-    <div class="al al-r"><div class="at">7 авто с истёкшим техосмотром</div><div class="as">В354РР30 — истекает через 2 дня (11.04.2026). Haval F7, Jolion, Tiggo 4 Pro — уже просрочены.</div></div>
-    <div class="al al-r"><div class="at">Бехоев М.М. — долг -533 319 ₽</div><div class="as">Пени −306 452 ₽ + аренда −161 493 ₽. Стаж 192 дня. Тел: +79831542621</div></div>
-    <div class="al al-a"><div class="at">181 водитель без медосмотра &gt;30 дней</div><div class="as">Рекорд 748 дней. Системная проблема — необходима немедленная инвентаризация.</div></div>
-    <div class="al al-a"><div class="at">6 авто в статусе ТОТАЛ — уточнить страховые выплаты</div><div class="as">А809НЕ30, Х404НО30, М664НР30, В967НР30, О782НР30, Т761НР30</div></div>
-  </div>
+    <div style="text-align:center;padding:20px;color:#555;font-size:13px">Загрузи данные через «📂 Обновить данные»</div>
+  </div></div>
 </div>
 
 <!-- АВТОПАРК -->
@@ -130,7 +111,7 @@ tr:hover td{background:rgba(255,255,255,.02)}
       <thead><tr>
         <th>Гос. номер</th><th>Статус</th><th>Модель</th><th>Год</th><th>Водитель</th><th>Пробег</th><th>ОСАГО</th><th>Техосмотр</th><th>Осмотр</th>
       </tr></thead>
-      <tbody id="carsBody"><tr style="border-bottom:1px solid #1a1e2d"><td style="padding:9px 8px;font-family:monospace;font-size:12px;font-weight:600;color:#dde1ef">К615НР30</td><td style="padding:9px 8px"><span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px;background:#f59e0b22;color:#f59e0b">Малярка</span></td><td style="padding:9px 8px;font-size:13px">Москвич 3</td><td style="padding:9px 8px;font-size:12px;color:#888">2023</td><td style="padding:9px 8px;font-size:12px;color:#777">—</td><td style="padding:9px 8px;font-size:12px">—</td><td style="padding:9px 8px;font-size:12px">12.09.2023<br><span style="color:#ef4444;font-weight:700">Просрочено 939д</span></td><td style="padding:9px 8px;font-size:12px">—<br>—</td><td style="padding:9px 8px;font-size:12px;color:#666">✓</td></tr><tr style="border-bottom:1px solid #1a1e2d"><td style="padding:9px 8px;font-family:monospace;font-size:12px;font-weight:600;color:#dde1ef">М583НР30</td><td style="padding:9px 8px"><span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px;background:#22c55e22;color:#22c55e">На линии</span></td><td style="padding:9px 8px;font-size:13px">Москвич 3</td><td style="padding:9px 8px;font-size:12px;color:#888">2023</td><td style="padding:9px 8px;font-size:12px;color:#777">Тостаев Бада</td><td style="padding:9px 8px;font-size:12px">12 400 км</td><td style="padding:9px 8px;font-size:12px">12.09.2023<br><span style="color:#ef4444;font-weight:700">Просрочено 939д</span></td><td style="padding:9px 8px;font-size:12px">—<br>—</td><td style="padding:9px 8px;font-size:12px;color:#ef4444">45д</td></tr><tr style="border-bottom:1px solid #1a1e2d"><td style="padding:9px 8px;font-family:monospace;font-size:12px;font-weight:600;color:#dde1ef">К542НР30</td><td style="padding:9px 8px"><span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px;background:#22c55e22;color:#22c55e">На линии</span></td><td style="padding:9px 8px;font-size:13px">Москвич 3</td><td style="padding:9px 8px;font-size:12px;color:#888">2023</td><td style="padding:9px 8px;font-size:12px;color:#777">Зарипов Ринат</td><td style="padding:9px 8px;font-size:12px">18 900 км</td><td style="padding:9px 8px;font-size:12px">12.09.2023<br><span style="color:#ef4444;font-weight:700">Просрочено 939д</span></td><td style="padding:9px 8px;font-size:12px">—<br>—</td><td style="padding:9px 8px;font-size:12px;color:#ef4444">120д</td></tr><tr style="border-bottom:1px solid #1a1e2d"><td style="padding:9px 8px;font-family:monospace;font-size:12px;font-weight:600;color:#dde1ef">М585НР30</td><td style="padding:9px 8px"><span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px;background:#22c55e22;color:#22c55e">На линии</span></td><td style="padding:9px 8px;font-size:13px">Москвич 3</td><td style="padding:9px 8px;font-size:12px;color:#888">2023</td><td style="padding:9px 8px;font-size:12px;color:#777">—</td><td style="padding:9px 8px;font-size:12px">—</td><td style="padding:9px 8px;font-size:12px">12.09.2023<br><span style="color:#ef4444;font-weight:700">Просрочено 939д</span></td><td style="padding:9px 8px;font-size:12px">—<br>—</td><td style="padding:9px 8px;font-size:12px;color:#666">✓</td></tr><tr style="border-bottom:1px solid #1a1e2d"><td style="padding:9px 8px;font-family:monospace;font-size:12px;font-weight:600;color:#dde1ef">Е919НР30</td><td style="padding:9px 8px"><span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px;background:#22c55e22;color:#22c55e">На линии</span></td><td style="padding:9px 8px;font-size:13px">Haval F7</td><td style="padding:9px 8px;font-size:12px;color:#888">2022</td><td style="padding:9px 8px;font-size:12px;color:#777">Изетов С.С.</td><td style="padding:9px 8px;font-size:12px">104 000 км</td><td style="padding:9px 8px;font-size:12px">15.11.2024<br><span style="color:#ef4444;font-weight:700">Просрочено 510д</span></td><td style="padding:9px 8px;font-size:12px">12.02.2026<br><span style="color:#ef4444;font-weight:700">Просрочено 55д</span></td><td style="padding:9px 8px;font-size:12px;color:#ef4444">250д</td></tr><tr style="border-bottom:1px solid #1a1e2d"><td style="padding:9px 8px;font-family:monospace;font-size:12px;font-weight:600;color:#dde1ef">Р919НР30</td><td style="padding:9px 8px"><span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px;background:#22c55e22;color:#22c55e">На линии</span></td><td style="padding:9px 8px;font-size:13px">Haval Jolion</td><td style="padding:9px 8px;font-size:12px;color:#888">2022</td><td style="padding:9px 8px;font-size:12px;color:#777">Синитенков С.В.</td><td style="padding:9px 8px;font-size:12px">94 200 км</td><td style="padding:9px 8px;font-size:12px">02.03.2024<br><span style="color:#ef4444;font-weight:700">Просрочено 402д</span></td><td style="padding:9px 8px;font-size:12px">—<br>—</td><td style="padding:9px 8px;font-size:12px;color:#ef4444">709д</td></tr><tr style="border-bottom:1px solid #1a1e2d"><td style="padding:9px 8px;font-family:monospace;font-size:12px;font-weight:600;color:#dde1ef">В628НР30</td><td style="padding:9px 8px"><span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px;background:#22c55e22;color:#22c55e">На линии</span></td><td style="padding:9px 8px;font-size:13px">Haval Jolion</td><td style="padding:9px 8px;font-size:12px;color:#888">2022</td><td style="padding:9px 8px;font-size:12px;color:#777">Бархатов Р.З.</td><td style="padding:9px 8px;font-size:12px">87 100 км</td><td style="padding:9px 8px;font-size:12px">02.03.2024<br><span style="color:#ef4444;font-weight:700">Просрочено 402д</span></td><td style="padding:9px 8px;font-size:12px">—<br>—</td><td style="padding:9px 8px;font-size:12px;color:#ef4444">400д</td></tr><tr style="border-bottom:1px solid #1a1e2d"><td style="padding:9px 8px;font-family:monospace;font-size:12px;font-weight:600;color:#dde1ef">Е191НР30</td><td style="padding:9px 8px"><span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px;background:#22c55e22;color:#22c55e">На линии</span></td><td style="padding:9px 8px;font-size:13px">Haval Jolion</td><td style="padding:9px 8px;font-size:12px;color:#888">2022</td><td style="padding:9px 8px;font-size:12px;color:#777">Нуралиев Аслан</td><td style="padding:9px 8px;font-size:12px">91 000 км</td><td style="padding:9px 8px;font-size:12px">02.03.2024<br><span style="color:#ef4444;font-weight:700">Просрочено 402д</span></td><td style="padding:9px 8px;font-size:12px">—<br>—</td><td style="padding:9px 8px;font-size:12px;color:#ef4444">350д</td></tr><tr style="border-bottom:1px solid #1a1e2d"><td style="padding:9px 8px;font-family:monospace;font-size:12px;font-weight:600;color:#dde1ef">К942НЕ30</td><td style="padding:9px 8px"><span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px;background:#22c55e22;color:#22c55e">На линии</span></td><td style="padding:9px 8px;font-size:13px">Chery Tiggo 4 Pro</td><td style="padding:9px 8px;font-size:12px;color:#888">2023</td><td style="padding:9px 8px;font-size:12px;color:#777">Бархатов Р.А.</td><td style="padding:9px 8px;font-size:12px">54 000 км</td><td style="padding:9px 8px;font-size:12px">04.06.2026<br><span style="color:#666">56 дн.</span></td><td style="padding:9px 8px;font-size:12px">07.01.2026<br><span style="color:#ef4444;font-weight:700">Просрочено 92д</span></td><td style="padding:9px 8px;font-size:12px;color:#ef4444">40д</td></tr><tr style="border-bottom:1px solid #1a1e2d"><td style="padding:9px 8px;font-family:monospace;font-size:12px;font-weight:600;color:#dde1ef">А470НР30</td><td style="padding:9px 8px"><span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px;background:#22c55e22;color:#22c55e">На линии</span></td><td style="padding:9px 8px;font-size:13px">Chery Tiggo 4 Pro</td><td style="padding:9px 8px;font-size:12px;color:#888">2023</td><td style="padding:9px 8px;font-size:12px;color:#777">Перепелков А.Ю.</td><td style="padding:9px 8px;font-size:12px">67 000 км</td><td style="padding:9px 8px;font-size:12px">—<br>—</td><td style="padding:9px 8px;font-size:12px">07.01.2026<br><span style="color:#ef4444;font-weight:700">Просрочено 92д</span></td><td style="padding:9px 8px;font-size:12px;color:#ef4444">180д</td></tr><tr style="border-bottom:1px solid #1a1e2d"><td style="padding:9px 8px;font-family:monospace;font-size:12px;font-weight:600;color:#dde1ef">К596РР30</td><td style="padding:9px 8px"><span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px;background:#22c55e22;color:#22c55e">На линии</span></td><td style="padding:9px 8px;font-size:13px">LADA Granta</td><td style="padding:9px 8px;font-size:12px;color:#888">2024</td><td style="padding:9px 8px;font-size:12px;color:#777">Марупов С.Р.</td><td style="padding:9px 8px;font-size:12px">43 200 км</td><td style="padding:9px 8px;font-size:12px">04.02.2026<br><span style="color:#ef4444;font-weight:700">Просрочено 63д</span></td><td style="padding:9px 8px;font-size:12px">—<br>—</td><td style="padding:9px 8px;font-size:12px;color:#ef4444">60д</td></tr><tr style="border-bottom:1px solid #1a1e2d"><td style="padding:9px 8px;font-family:monospace;font-size:12px;font-weight:600;color:#dde1ef">В942НР30</td><td style="padding:9px 8px"><span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px;background:#22c55e22;color:#22c55e">На линии</span></td><td style="padding:9px 8px;font-size:13px">LADA Granta</td><td style="padding:9px 8px;font-size:12px;color:#888">2024</td><td style="padding:9px 8px;font-size:12px;color:#777">Шитик К.Э.</td><td style="padding:9px 8px;font-size:12px">38 700 км</td><td style="padding:9px 8px;font-size:12px">04.02.2026<br><span style="color:#ef4444;font-weight:700">Просрочено 63д</span></td><td style="padding:9px 8px;font-size:12px">—<br>—</td><td style="padding:9px 8px;font-size:12px;color:#ef4444">55д</td></tr><tr style="border-bottom:1px solid #1a1e2d"><td style="padding:9px 8px;font-family:monospace;font-size:12px;font-weight:600;color:#dde1ef">Н936НР30</td><td style="padding:9px 8px"><span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px;background:#22c55e22;color:#22c55e">На линии</span></td><td style="padding:9px 8px;font-size:13px">Haval Jolion</td><td style="padding:9px 8px;font-size:12px;color:#888">2022</td><td style="padding:9px 8px;font-size:12px;color:#777">Панчулидзе З.А.</td><td style="padding:9px 8px;font-size:12px">89 000 км</td><td style="padding:9px 8px;font-size:12px">—<br>—</td><td style="padding:9px 8px;font-size:12px">07.02.2026<br><span style="color:#ef4444;font-weight:700">Просрочено 60д</span></td><td style="padding:9px 8px;font-size:12px;color:#ef4444">200д</td></tr><tr style="border-bottom:1px solid #1a1e2d"><td style="padding:9px 8px;font-family:monospace;font-size:12px;font-weight:600;color:#dde1ef">О143НР30</td><td style="padding:9px 8px"><span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px;background:#22c55e22;color:#22c55e">На линии</span></td><td style="padding:9px 8px;font-size:13px">Haval Jolion</td><td style="padding:9px 8px;font-size:12px;color:#888">2022</td><td style="padding:9px 8px;font-size:12px;color:#777">Табелов С.Н.</td><td style="padding:9px 8px;font-size:12px">92 000 км</td><td style="padding:9px 8px;font-size:12px">—<br>—</td><td style="padding:9px 8px;font-size:12px">09.02.2026<br><span style="color:#ef4444;font-weight:700">Просрочено 58д</span></td><td style="padding:9px 8px;font-size:12px;color:#ef4444">220д</td></tr><tr style="border-bottom:1px solid #1a1e2d"><td style="padding:9px 8px;font-family:monospace;font-size:12px;font-weight:600;color:#dde1ef">В131НЕ30</td><td style="padding:9px 8px"><span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px;background:#ef444422;color:#ef4444">Ремонт</span></td><td style="padding:9px 8px;font-size:13px">Chery Tiggo 4</td><td style="padding:9px 8px;font-size:12px;color:#888">2023</td><td style="padding:9px 8px;font-size:12px;color:#777">—</td><td style="padding:9px 8px;font-size:12px">—</td><td style="padding:9px 8px;font-size:12px">28.02.2026<br><span style="color:#ef4444;font-weight:700">Просрочено 40д</span></td><td style="padding:9px 8px;font-size:12px">16.03.2026<br><span style="color:#ef4444;font-weight:700">Просрочено 24д</span></td><td style="padding:9px 8px;font-size:12px;color:#666">✓</td></tr><tr style="border-bottom:1px solid #1a1e2d"><td style="padding:9px 8px;font-family:monospace;font-size:12px;font-weight:600;color:#dde1ef">К213НЕ30</td><td style="padding:9px 8px"><span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px;background:#22c55e22;color:#22c55e">На линии</span></td><td style="padding:9px 8px;font-size:13px">Haval F7</td><td style="padding:9px 8px;font-size:12px;color:#888">2022</td><td style="padding:9px 8px;font-size:12px;color:#777">Краевский Э.Ч.</td><td style="padding:9px 8px;font-size:12px">97 000 км</td><td style="padding:9px 8px;font-size:12px">—<br>—</td><td style="padding:9px 8px;font-size:12px">11.03.2026<br><span style="color:#ef4444;font-weight:700">Просрочено 29д</span></td><td style="padding:9px 8px;font-size:12px;color:#ef4444">143д</td></tr><tr style="border-bottom:1px solid #1a1e2d"><td style="padding:9px 8px;font-family:monospace;font-size:12px;font-weight:600;color:#dde1ef">О759НХ30</td><td style="padding:9px 8px"><span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px;background:#22c55e22;color:#22c55e">На линии</span></td><td style="padding:9px 8px;font-size:13px">Chery Arrizo 8</td><td style="padding:9px 8px;font-size:12px;color:#888">2025</td><td style="padding:9px 8px;font-size:12px;color:#777">Орлов Р.Г.</td><td style="padding:9px 8px;font-size:12px">21 000 км</td><td style="padding:9px 8px;font-size:12px">04.04.2026<br><span style="color:#ef4444;font-weight:700">Просрочено 5д</span></td><td style="padding:9px 8px;font-size:12px">—<br>—</td><td style="padding:9px 8px;font-size:12px;color:#666">30д</td></tr><tr style="border-bottom:1px solid #1a1e2d"><td style="padding:9px 8px;font-family:monospace;font-size:12px;font-weight:600;color:#dde1ef">В354РР30</td><td style="padding:9px 8px"><span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px;background:#22c55e22;color:#22c55e">На линии</span></td><td style="padding:9px 8px;font-size:13px">BELGEE X50</td><td style="padding:9px 8px;font-size:12px;color:#888">2024</td><td style="padding:9px 8px;font-size:12px;color:#777">Марин Ион Иванович</td><td style="padding:9px 8px;font-size:12px">49 744 км</td><td style="padding:9px 8px;font-size:12px">01.12.2026<br><span style="color:#666">236 дн.</span></td><td style="padding:9px 8px;font-size:12px">11.04.2026<br><span style="color:#ef4444;font-weight:700">2 дн.!</span></td><td style="padding:9px 8px;font-size:12px;color:#ef4444">32д</td></tr><tr style="border-bottom:1px solid #1a1e2d"><td style="padding:9px 8px;font-family:monospace;font-size:12px;font-weight:600;color:#dde1ef">О808НХ30</td><td style="padding:9px 8px"><span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px;background:#22c55e22;color:#22c55e">На линии</span></td><td style="padding:9px 8px;font-size:13px">LADA Granta</td><td style="padding:9px 8px;font-size:12px;color:#888">2025</td><td style="padding:9px 8px;font-size:12px;color:#777">Асрабоев А.Ж.</td><td style="padding:9px 8px;font-size:12px">18 900 км</td><td style="padding:9px 8px;font-size:12px">04.05.2026<br><span style="color:#f59e0b;font-weight:600">25 дн.</span></td><td style="padding:9px 8px;font-size:12px">—<br>—</td><td style="padding:9px 8px;font-size:12px;color:#666">20д</td></tr><tr style="border-bottom:1px solid #1a1e2d"><td style="padding:9px 8px;font-family:monospace;font-size:12px;font-weight:600;color:#dde1ef">С426НР30</td><td style="padding:9px 8px"><span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px;background:#22c55e22;color:#22c55e">На линии</span></td><td style="padding:9px 8px;font-size:13px">Haval Jolion</td><td style="padding:9px 8px;font-size:12px;color:#888">2022</td><td style="padding:9px 8px;font-size:12px;color:#777">Белых В.О.</td><td style="padding:9px 8px;font-size:12px">88 000 км</td><td style="padding:9px 8px;font-size:12px">—<br>—</td><td style="padding:9px 8px;font-size:12px">09.05.2026<br><span style="color:#f59e0b;font-weight:600">30 дн.</span></td><td style="padding:9px 8px;font-size:12px;color:#ef4444">90д</td></tr><tr style="border-bottom:1px solid #1a1e2d"><td style="padding:9px 8px;font-family:monospace;font-size:12px;font-weight:600;color:#dde1ef">В347РР30</td><td style="padding:9px 8px"><span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px;background:#22c55e22;color:#22c55e">На линии</span></td><td style="padding:9px 8px;font-size:13px">BELGEE X50</td><td style="padding:9px 8px;font-size:12px;color:#888">2024</td><td style="padding:9px 8px;font-size:12px;color:#777">Рамазанов Шамиль</td><td style="padding:9px 8px;font-size:12px">93 969 км</td><td style="padding:9px 8px;font-size:12px">13.11.2026<br><span style="color:#666">218 дн.</span></td><td style="padding:9px 8px;font-size:12px">—<br>—</td><td style="padding:9px 8px;font-size:12px;color:#ef4444">122д</td></tr><tr style="border-bottom:1px solid #1a1e2d"><td style="padding:9px 8px;font-family:monospace;font-size:12px;font-weight:600;color:#dde1ef">В362РР30</td><td style="padding:9px 8px"><span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px;background:#22c55e22;color:#22c55e">На линии</span></td><td style="padding:9px 8px;font-size:13px">BELGEE X50</td><td style="padding:9px 8px;font-size:12px;color:#888">2024</td><td style="padding:9px 8px;font-size:12px;color:#777">Осмонали Уулу Анарбай</td><td style="padding:9px 8px;font-size:12px">49 744 км</td><td style="padding:9px 8px;font-size:12px">01.12.2026<br><span style="color:#666">236 дн.</span></td><td style="padding:9px 8px;font-size:12px">—<br>—</td><td style="padding:9px 8px;font-size:12px;color:#ef4444">32д</td></tr><tr style="border-bottom:1px solid #1a1e2d"><td style="padding:9px 8px;font-family:monospace;font-size:12px;font-weight:600;color:#dde1ef">О713НХ30</td><td style="padding:9px 8px"><span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px;background:#ef444422;color:#ef4444">Ремонт</span></td><td style="padding:9px 8px;font-size:13px">Chery Arrizo 8</td><td style="padding:9px 8px;font-size:12px;color:#888">2024</td><td style="padding:9px 8px;font-size:12px;color:#777">—</td><td style="padding:9px 8px;font-size:12px">—</td><td style="padding:9px 8px;font-size:12px">—<br>—</td><td style="padding:9px 8px;font-size:12px">—<br>—</td><td style="padding:9px 8px;font-size:12px;color:#666">✓</td></tr><tr style="border-bottom:1px solid #1a1e2d"><td style="padding:9px 8px;font-family:monospace;font-size:12px;font-weight:600;color:#dde1ef">К962НЕ30</td><td style="padding:9px 8px"><span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px;background:#ef444422;color:#ef4444">Ремонт</span></td><td style="padding:9px 8px;font-size:13px">Chery Tiggo 4 Pro</td><td style="padding:9px 8px;font-size:12px;color:#888">2023</td><td style="padding:9px 8px;font-size:12px;color:#777">—</td><td style="padding:9px 8px;font-size:12px">—</td><td style="padding:9px 8px;font-size:12px">—<br>—</td><td style="padding:9px 8px;font-size:12px">—<br>—</td><td style="padding:9px 8px;font-size:12px;color:#666">✓</td></tr><tr style="border-bottom:1px solid #1a1e2d"><td style="padding:9px 8px;font-family:monospace;font-size:12px;font-weight:600;color:#dde1ef">М639НР30</td><td style="padding:9px 8px"><span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px;background:#ef444422;color:#ef4444">Ремонт</span></td><td style="padding:9px 8px;font-size:13px">Geely Atlas Pro</td><td style="padding:9px 8px;font-size:12px;color:#888">2023</td><td style="padding:9px 8px;font-size:12px;color:#777">Ионов И.В.</td><td style="padding:9px 8px;font-size:12px">—</td><td style="padding:9px 8px;font-size:12px">—<br>—</td><td style="padding:9px 8px;font-size:12px">—<br>—</td><td style="padding:9px 8px;font-size:12px;color:#666">✓</td></tr><tr style="border-bottom:1px solid #1a1e2d"><td style="padding:9px 8px;font-family:monospace;font-size:12px;font-weight:600;color:#dde1ef">М931НР30</td><td style="padding:9px 8px"><span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px;background:#ef444422;color:#ef4444">Ремонт</span></td><td style="padding:9px 8px;font-size:13px">LADA Granta</td><td style="padding:9px 8px;font-size:12px;color:#888">2023</td><td style="padding:9px 8px;font-size:12px;color:#777">—</td><td style="padding:9px 8px;font-size:12px">—</td><td style="padding:9px 8px;font-size:12px">—<br>—</td><td style="padding:9px 8px;font-size:12px">—<br>—</td><td style="padding:9px 8px;font-size:12px;color:#666">✓</td></tr><tr style="border-bottom:1px solid #1a1e2d"><td style="padding:9px 8px;font-family:monospace;font-size:12px;font-weight:600;color:#dde1ef">Н990НР30</td><td style="padding:9px 8px"><span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px;background:#ef444422;color:#ef4444">Ремонт</span></td><td style="padding:9px 8px;font-size:13px">LADA Granta</td><td style="padding:9px 8px;font-size:12px;color:#888">2024</td><td style="padding:9px 8px;font-size:12px;color:#777">—</td><td style="padding:9px 8px;font-size:12px">—</td><td style="padding:9px 8px;font-size:12px">—<br>—</td><td style="padding:9px 8px;font-size:12px">—<br>—</td><td style="padding:9px 8px;font-size:12px;color:#666">✓</td></tr><tr style="border-bottom:1px solid #1a1e2d"><td style="padding:9px 8px;font-family:monospace;font-size:12px;font-weight:600;color:#dde1ef">Е401НР30</td><td style="padding:9px 8px"><span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px;background:#ef444422;color:#ef4444">Ремонт</span></td><td style="padding:9px 8px;font-size:13px">LADA Granta</td><td style="padding:9px 8px;font-size:12px;color:#888">2024</td><td style="padding:9px 8px;font-size:12px;color:#777">—</td><td style="padding:9px 8px;font-size:12px">—</td><td style="padding:9px 8px;font-size:12px">—<br>—</td><td style="padding:9px 8px;font-size:12px">—<br>—</td><td style="padding:9px 8px;font-size:12px;color:#666">✓</td></tr><tr style="border-bottom:1px solid #1a1e2d"><td style="padding:9px 8px;font-family:monospace;font-size:12px;font-weight:600;color:#dde1ef">О580НР30</td><td style="padding:9px 8px"><span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px;background:#ef444422;color:#ef4444">Ремонт</span></td><td style="padding:9px 8px;font-size:13px">LADA Granta</td><td style="padding:9px 8px;font-size:12px;color:#888">2023</td><td style="padding:9px 8px;font-size:12px;color:#777">—</td><td style="padding:9px 8px;font-size:12px">—</td><td style="padding:9px 8px;font-size:12px">—<br>—</td><td style="padding:9px 8px;font-size:12px">—<br>—</td><td style="padding:9px 8px;font-size:12px;color:#666">✓</td></tr><tr style="border-bottom:1px solid #1a1e2d"><td style="padding:9px 8px;font-family:monospace;font-size:12px;font-weight:600;color:#dde1ef">С374НР30</td><td style="padding:9px 8px"><span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px;background:#f59e0b22;color:#f59e0b">Малярка</span></td><td style="padding:9px 8px;font-size:13px">Haval Jolion</td><td style="padding:9px 8px;font-size:12px;color:#888">2022</td><td style="padding:9px 8px;font-size:12px;color:#777">—</td><td style="padding:9px 8px;font-size:12px">—</td><td style="padding:9px 8px;font-size:12px">—<br>—</td><td style="padding:9px 8px;font-size:12px">—<br>—</td><td style="padding:9px 8px;font-size:12px;color:#666">✓</td></tr><tr style="border-bottom:1px solid #1a1e2d"><td style="padding:9px 8px;font-family:monospace;font-size:12px;font-weight:600;color:#dde1ef">О442НР30</td><td style="padding:9px 8px"><span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px;background:#f59e0b22;color:#f59e0b">Малярка</span></td><td style="padding:9px 8px;font-size:13px">Haval Jolion</td><td style="padding:9px 8px;font-size:12px;color:#888">2022</td><td style="padding:9px 8px;font-size:12px;color:#777">—</td><td style="padding:9px 8px;font-size:12px">—</td><td style="padding:9px 8px;font-size:12px">—<br>—</td><td style="padding:9px 8px;font-size:12px">—<br>—</td><td style="padding:9px 8px;font-size:12px;color:#666">✓</td></tr><tr style="border-bottom:1px solid #1a1e2d"><td style="padding:9px 8px;font-family:monospace;font-size:12px;font-weight:600;color:#dde1ef">О174НР30</td><td style="padding:9px 8px"><span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px;background:#f59e0b22;color:#f59e0b">Малярка</span></td><td style="padding:9px 8px;font-size:13px">LADA Granta</td><td style="padding:9px 8px;font-size:12px;color:#888">2023</td><td style="padding:9px 8px;font-size:12px;color:#777">—</td><td style="padding:9px 8px;font-size:12px">—</td><td style="padding:9px 8px;font-size:12px">—<br>—</td><td style="padding:9px 8px;font-size:12px">—<br>—</td><td style="padding:9px 8px;font-size:12px;color:#666">✓</td></tr><tr style="border-bottom:1px solid #1a1e2d"><td style="padding:9px 8px;font-family:monospace;font-size:12px;font-weight:600;color:#dde1ef">А809НЕ30</td><td style="padding:9px 8px"><span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px;background:#dc262622;color:#dc2626">Тотал</span></td><td style="padding:9px 8px;font-size:13px">Chery Tiggo 4 Pro</td><td style="padding:9px 8px;font-size:12px;color:#888">2023</td><td style="padding:9px 8px;font-size:12px;color:#777">—</td><td style="padding:9px 8px;font-size:12px">—</td><td style="padding:9px 8px;font-size:12px">—<br>—</td><td style="padding:9px 8px;font-size:12px">—<br>—</td><td style="padding:9px 8px;font-size:12px;color:#666">✓</td></tr><tr style="border-bottom:1px solid #1a1e2d"><td style="padding:9px 8px;font-family:monospace;font-size:12px;font-weight:600;color:#dde1ef">Х404НО30</td><td style="padding:9px 8px"><span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px;background:#dc262622;color:#dc2626">Тотал</span></td><td style="padding:9px 8px;font-size:13px">Chery Tiggo 7 Pro Max</td><td style="padding:9px 8px;font-size:12px;color:#888">2023</td><td style="padding:9px 8px;font-size:12px;color:#777">—</td><td style="padding:9px 8px;font-size:12px">—</td><td style="padding:9px 8px;font-size:12px">—<br>—</td><td style="padding:9px 8px;font-size:12px">—<br>—</td><td style="padding:9px 8px;font-size:12px;color:#666">✓</td></tr><tr style="border-bottom:1px solid #1a1e2d"><td style="padding:9px 8px;font-family:monospace;font-size:12px;font-weight:600;color:#dde1ef">М664НР30</td><td style="padding:9px 8px"><span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px;background:#dc262622;color:#dc2626">Тотал</span></td><td style="padding:9px 8px;font-size:13px">Geely Atlas Pro</td><td style="padding:9px 8px;font-size:12px;color:#888">2023</td><td style="padding:9px 8px;font-size:12px;color:#777">—</td><td style="padding:9px 8px;font-size:12px">—</td><td style="padding:9px 8px;font-size:12px">—<br>—</td><td style="padding:9px 8px;font-size:12px">—<br>—</td><td style="padding:9px 8px;font-size:12px;color:#666">✓</td></tr><tr style="border-bottom:1px solid #1a1e2d"><td style="padding:9px 8px;font-family:monospace;font-size:12px;font-weight:600;color:#dde1ef">В967НР30</td><td style="padding:9px 8px"><span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px;background:#dc262622;color:#dc2626">Тотал</span></td><td style="padding:9px 8px;font-size:13px">LADA Granta</td><td style="padding:9px 8px;font-size:12px;color:#888">2022</td><td style="padding:9px 8px;font-size:12px;color:#777">—</td><td style="padding:9px 8px;font-size:12px">67 000 км</td><td style="padding:9px 8px;font-size:12px">—<br>—</td><td style="padding:9px 8px;font-size:12px">—<br>—</td><td style="padding:9px 8px;font-size:12px;color:#ef4444">734д</td></tr><tr style="border-bottom:1px solid #1a1e2d"><td style="padding:9px 8px;font-family:monospace;font-size:12px;font-weight:600;color:#dde1ef">О782НР30</td><td style="padding:9px 8px"><span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px;background:#dc262622;color:#dc2626">Тотал</span></td><td style="padding:9px 8px;font-size:13px">LADA Granta</td><td style="padding:9px 8px;font-size:12px;color:#888">2023</td><td style="padding:9px 8px;font-size:12px;color:#777">—</td><td style="padding:9px 8px;font-size:12px">—</td><td style="padding:9px 8px;font-size:12px">—<br>—</td><td style="padding:9px 8px;font-size:12px">—<br>—</td><td style="padding:9px 8px;font-size:12px;color:#666">✓</td></tr><tr style="border-bottom:1px solid #1a1e2d"><td style="padding:9px 8px;font-family:monospace;font-size:12px;font-weight:600;color:#dde1ef">Т761НР30</td><td style="padding:9px 8px"><span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px;background:#dc262622;color:#dc2626">Тотал</span></td><td style="padding:9px 8px;font-size:13px">LADA Granta</td><td style="padding:9px 8px;font-size:12px;color:#888">2023</td><td style="padding:9px 8px;font-size:12px;color:#777">—</td><td style="padding:9px 8px;font-size:12px">—</td><td style="padding:9px 8px;font-size:12px">—<br>—</td><td style="padding:9px 8px;font-size:12px">—<br>—</td><td style="padding:9px 8px;font-size:12px;color:#666">✓</td></tr></tbody>
+      <tbody id="carsBody"></tbody>
     </table>
     </div>
   </div>
@@ -257,13 +238,13 @@ tr:hover td{background:rgba(255,255,255,.02)}
 <div id="t-debt" style="display:none">
   <div class="card">
     <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:14px">
-      <div><div class="st" style="margin:0">Топ должников — реальные данные 1С</div><div style="font-size:12px;color:#555;margin-top:4px">Суммарный долг: <span style="color:#ef4444;font-weight:600">2.2М ₽</span> · Аренда: 863К ₽ · Пени: 642К ₽</div></div>
+      <div><div class="st" style="margin:0">Топ должников — реальные данные 1С</div><div style="font-size:12px;color:#555;margin-top:4px">Суммарный долг: <span style="color:#ef4444;font-weight:600"><span id="debt-summary-inline">загрузи данные</span></div></div>
       <input class="srch" id="ds" placeholder="Поиск водителя..." oninput="filterDebt()">
     </div>
     <div style="overflow-x:auto">
     <table>
       <thead><tr><th>#</th><th>Водитель</th><th>Итого</th><th>Аренда</th><th>Пени</th><th>Повреждения</th><th>Авто</th><th>Стаж</th><th>Сегмент</th></tr></thead>
-      <tbody id="debtBody"><tr style="border-bottom:1px solid #1a1e2d"><td style="padding:9px 8px;color:#555;font-size:12px">1</td><td style="padding:9px 8px"><div style="font-weight:600;font-size:13px">Бехоев Майрхаж Магомедович</div><div style="font-size:11px;color:#555">+79831542621</div></td><td style="padding:9px 8px;color:#ef4444;font-weight:700">-533 319 ₽</td><td style="padding:9px 8px;color:#ef4444;font-size:12px">-161 493 ₽</td><td style="padding:9px 8px;color:#f59e0b;font-size:12px">-306 452 ₽</td><td style="padding:9px 8px;color:#666;font-size:12px">—</td><td style="padding:9px 8px;font-size:11px;color:#777;font-family:monospace">—</td><td style="padding:9px 8px;font-size:12px">192д</td><td style="padding:9px 8px"><span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px;background:#ef444422;color:#ef4444">Балласт</span></td></tr><tr style="border-bottom:1px solid #1a1e2d"><td style="padding:9px 8px;color:#555;font-size:12px">2</td><td style="padding:9px 8px"><div style="font-weight:600;font-size:13px">Канцедал Александр Владимирович</div><div style="font-size:11px;color:#555">+79150004098</div></td><td style="padding:9px 8px;color:#ef4444;font-weight:700">-198 479 ₽</td><td style="padding:9px 8px;color:#ef4444;font-size:12px">-36 634 ₽</td><td style="padding:9px 8px;color:#666;font-size:12px">—</td><td style="padding:9px 8px;color:#8b5cf6;font-size:12px">-150 000 ₽</td><td style="padding:9px 8px;font-size:11px;color:#777;font-family:monospace">—</td><td style="padding:9px 8px;font-size:12px">309д</td><td style="padding:9px 8px"><span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px;background:#ef444422;color:#ef4444">Балласт</span></td></tr><tr style="border-bottom:1px solid #1a1e2d"><td style="padding:9px 8px;color:#555;font-size:12px">3</td><td style="padding:9px 8px"><div style="font-weight:600;font-size:13px">Фоменко Алексей Викторович</div><div style="font-size:11px;color:#555">+79661987417</div></td><td style="padding:9px 8px;color:#ef4444;font-weight:700">-144 326 ₽</td><td style="padding:9px 8px;color:#ef4444;font-size:12px">-18 084 ₽</td><td style="padding:9px 8px;color:#666;font-size:12px">—</td><td style="padding:9px 8px;color:#8b5cf6;font-size:12px">-121 911 ₽</td><td style="padding:9px 8px;font-size:11px;color:#777;font-family:monospace">С355НР30</td><td style="padding:9px 8px;font-size:12px">328д</td><td style="padding:9px 8px"><span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px;background:#ef444422;color:#ef4444">Балласт</span></td></tr><tr style="border-bottom:1px solid #1a1e2d"><td style="padding:9px 8px;color:#555;font-size:12px">4</td><td style="padding:9px 8px"><div style="font-weight:600;font-size:13px">Хутов Фуад Хусеевич</div><div style="font-size:11px;color:#555">+79036910000</div></td><td style="padding:9px 8px;color:#ef4444;font-weight:700">-139 903 ₽</td><td style="padding:9px 8px;color:#ef4444;font-size:12px">-124 334 ₽</td><td style="padding:9px 8px;color:#666;font-size:12px">—</td><td style="padding:9px 8px;color:#8b5cf6;font-size:12px">-10 000 ₽</td><td style="padding:9px 8px;font-size:11px;color:#777;font-family:monospace">О101НР30</td><td style="padding:9px 8px;font-size:12px">406д</td><td style="padding:9px 8px"><span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px;background:#ef444422;color:#ef4444">Балласт</span></td></tr><tr style="border-bottom:1px solid #1a1e2d"><td style="padding:9px 8px;color:#555;font-size:12px">5</td><td style="padding:9px 8px"><div style="font-weight:600;font-size:13px">Туровский Константин Эдуардович</div><div style="font-size:11px;color:#555">+79859113511</div></td><td style="padding:9px 8px;color:#ef4444;font-weight:700">-128 900 ₽</td><td style="padding:9px 8px;color:#ef4444;font-size:12px">-13 705 ₽</td><td style="padding:9px 8px;color:#666;font-size:12px">-3 301 ₽</td><td style="padding:9px 8px;color:#8b5cf6;font-size:12px">-107 800 ₽</td><td style="padding:9px 8px;font-size:11px;color:#777;font-family:monospace">М361НР30</td><td style="padding:9px 8px;font-size:12px">590д</td><td style="padding:9px 8px"><span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px;background:#ef444422;color:#ef4444">Балласт</span></td></tr><tr style="border-bottom:1px solid #1a1e2d"><td style="padding:9px 8px;color:#555;font-size:12px">6</td><td style="padding:9px 8px"><div style="font-weight:600;font-size:13px">Фадеев Александр Игоревич</div><div style="font-size:11px;color:#555">+79096444858</div></td><td style="padding:9px 8px;color:#ef4444;font-weight:700">-113 307 ₽</td><td style="padding:9px 8px;color:#ef4444;font-size:12px">-70 238 ₽</td><td style="padding:9px 8px;color:#f59e0b;font-size:12px">-41 559 ₽</td><td style="padding:9px 8px;color:#666;font-size:12px">—</td><td style="padding:9px 8px;font-size:11px;color:#777;font-family:monospace">М361НР30</td><td style="padding:9px 8px;font-size:12px">778д</td><td style="padding:9px 8px"><span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px;background:#ef444422;color:#ef4444">Балласт</span></td></tr><tr style="border-bottom:1px solid #1a1e2d"><td style="padding:9px 8px;color:#555;font-size:12px">7</td><td style="padding:9px 8px"><div style="font-weight:600;font-size:13px">Герасимчик Сергей Вячеславович</div><div style="font-size:11px;color:#555">+79258349656</div></td><td style="padding:9px 8px;color:#ef4444;font-weight:700">-112 480 ₽</td><td style="padding:9px 8px;color:#ef4444;font-size:12px">-99 680 ₽</td><td style="padding:9px 8px;color:#666;font-size:12px">—</td><td style="padding:9px 8px;color:#666;font-size:12px">—</td><td style="padding:9px 8px;font-size:11px;color:#777;font-family:monospace">М639НР30</td><td style="padding:9px 8px;font-size:12px">567д</td><td style="padding:9px 8px"><span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px;background:#ef444422;color:#ef4444">Балласт</span></td></tr><tr style="border-bottom:1px solid #1a1e2d"><td style="padding:9px 8px;color:#555;font-size:12px">8</td><td style="padding:9px 8px"><div style="font-weight:600;font-size:13px">Долгова Юлия Алексеевна</div><div style="font-size:11px;color:#555">+79099939917</div></td><td style="padding:9px 8px;color:#ef4444;font-weight:700">-104 109 ₽</td><td style="padding:9px 8px;color:#ef4444;font-size:12px">-27 968 ₽</td><td style="padding:9px 8px;color:#f59e0b;font-size:12px">-45 245 ₽</td><td style="padding:9px 8px;color:#8b5cf6;font-size:12px">-13 789 ₽</td><td style="padding:9px 8px;font-size:11px;color:#777;font-family:monospace">—</td><td style="padding:9px 8px;font-size:12px">647д</td><td style="padding:9px 8px"><span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px;background:#ef444422;color:#ef4444">Балласт</span></td></tr><tr style="border-bottom:1px solid #1a1e2d"><td style="padding:9px 8px;color:#555;font-size:12px">9</td><td style="padding:9px 8px"><div style="font-weight:600;font-size:13px">Шпаков Александр</div><div style="font-size:11px;color:#555">+79104093130</div></td><td style="padding:9px 8px;color:#ef4444;font-weight:700">-103 404 ₽</td><td style="padding:9px 8px;color:#ef4444;font-size:12px">-96 800 ₽</td><td style="padding:9px 8px;color:#666;font-size:12px">—</td><td style="padding:9px 8px;color:#666;font-size:12px">—</td><td style="padding:9px 8px;font-size:11px;color:#777;font-family:monospace">—</td><td style="padding:9px 8px;font-size:12px">0д</td><td style="padding:9px 8px"><span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px;background:#ef444422;color:#ef4444">Балласт</span></td></tr><tr style="border-bottom:1px solid #1a1e2d"><td style="padding:9px 8px;color:#555;font-size:12px">10</td><td style="padding:9px 8px"><div style="font-weight:600;font-size:13px">Толмачев Артем Алексеевич</div><div style="font-size:11px;color:#555">+79777679957</div></td><td style="padding:9px 8px;color:#ef4444;font-weight:700">-90 754 ₽</td><td style="padding:9px 8px;color:#666;font-size:12px">—</td><td style="padding:9px 8px;color:#f59e0b;font-size:12px">-90 754 ₽</td><td style="padding:9px 8px;color:#666;font-size:12px">—</td><td style="padding:9px 8px;font-size:11px;color:#777;font-family:monospace">—</td><td style="padding:9px 8px;font-size:12px">7д</td><td style="padding:9px 8px"><span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px;background:#ef444422;color:#ef4444">Балласт</span></td></tr><tr style="border-bottom:1px solid #1a1e2d"><td style="padding:9px 8px;color:#555;font-size:12px">11</td><td style="padding:9px 8px"><div style="font-weight:600;font-size:13px">Золотова Елена</div><div style="font-size:11px;color:#555">+79859341775</div></td><td style="padding:9px 8px;color:#ef4444;font-weight:700">-70 718 ₽</td><td style="padding:9px 8px;color:#ef4444;font-size:12px">-31 030 ₽</td><td style="padding:9px 8px;color:#f59e0b;font-size:12px">-39 688 ₽</td><td style="padding:9px 8px;color:#666;font-size:12px">—</td><td style="padding:9px 8px;font-size:11px;color:#777;font-family:monospace">М619НР30</td><td style="padding:9px 8px;font-size:12px">141д</td><td style="padding:9px 8px"><span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px;background:#ef444422;color:#ef4444">Балласт</span></td></tr><tr style="border-bottom:1px solid #1a1e2d"><td style="padding:9px 8px;color:#555;font-size:12px">12</td><td style="padding:9px 8px"><div style="font-weight:600;font-size:13px">Семенихин Антон Васильевич</div><div style="font-size:11px;color:#555">+79649285066</div></td><td style="padding:9px 8px;color:#ef4444;font-weight:700">-69 899 ₽</td><td style="padding:9px 8px;color:#666;font-size:12px">—</td><td style="padding:9px 8px;color:#666;font-size:12px">—</td><td style="padding:9px 8px;color:#8b5cf6;font-size:12px">-69 899 ₽</td><td style="padding:9px 8px;font-size:11px;color:#777;font-family:monospace">—</td><td style="padding:9px 8px;font-size:12px">72д</td><td style="padding:9px 8px"><span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px;background:#ef444422;color:#ef4444">Балласт</span></td></tr><tr style="border-bottom:1px solid #1a1e2d"><td style="padding:9px 8px;color:#555;font-size:12px">13</td><td style="padding:9px 8px"><div style="font-weight:600;font-size:13px">Соколов Никита Денисович</div><div style="font-size:11px;color:#555">+79778129396</div></td><td style="padding:9px 8px;color:#ef4444;font-weight:700">-50 114 ₽</td><td style="padding:9px 8px;color:#ef4444;font-size:12px">-30 471 ₽</td><td style="padding:9px 8px;color:#f59e0b;font-size:12px">-19 643 ₽</td><td style="padding:9px 8px;color:#666;font-size:12px">—</td><td style="padding:9px 8px;font-size:11px;color:#777;font-family:monospace">К247НЕ30</td><td style="padding:9px 8px;font-size:12px">658д</td><td style="padding:9px 8px"><span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px;background:#6366f122;color:#6366f1">Потенциал</span></td></tr><tr style="border-bottom:1px solid #1a1e2d"><td style="padding:9px 8px;color:#555;font-size:12px">14</td><td style="padding:9px 8px"><div style="font-weight:600;font-size:13px">Рязанцев Иван Олегович</div><div style="font-size:11px;color:#555">+79778987380</div></td><td style="padding:9px 8px;color:#ef4444;font-weight:700">-48 706 ₽</td><td style="padding:9px 8px;color:#ef4444;font-size:12px">-27 723 ₽</td><td style="padding:9px 8px;color:#f59e0b;font-size:12px">-16 183 ₽</td><td style="padding:9px 8px;color:#666;font-size:12px">—</td><td style="padding:9px 8px;font-size:11px;color:#777;font-family:monospace">Х908НУ30</td><td style="padding:9px 8px;font-size:12px">35д</td><td style="padding:9px 8px"><span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px;background:#6366f122;color:#6366f1">Потенциал</span></td></tr><tr style="border-bottom:1px solid #1a1e2d"><td style="padding:9px 8px;color:#555;font-size:12px">15</td><td style="padding:9px 8px"><div style="font-weight:600;font-size:13px">Искендеров Александр</div><div style="font-size:11px;color:#555">+79781177111</div></td><td style="padding:9px 8px;color:#ef4444;font-weight:700">-47 808 ₽</td><td style="padding:9px 8px;color:#ef4444;font-size:12px">-24 928 ₽</td><td style="padding:9px 8px;color:#f59e0b;font-size:12px">-8 130 ₽</td><td style="padding:9px 8px;color:#666;font-size:12px">—</td><td style="padding:9px 8px;font-size:11px;color:#777;font-family:monospace">О291НХ30</td><td style="padding:9px 8px;font-size:12px">114д</td><td style="padding:9px 8px"><span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px;background:#6366f122;color:#6366f1">Потенциал</span></td></tr><tr style="border-bottom:1px solid #1a1e2d"><td style="padding:9px 8px;color:#555;font-size:12px">16</td><td style="padding:9px 8px"><div style="font-weight:600;font-size:13px">Краевский Эдмунд Чеславович</div><div style="font-size:11px;color:#555">+79939193685</div></td><td style="padding:9px 8px;color:#ef4444;font-weight:700">-47 257 ₽</td><td style="padding:9px 8px;color:#666;font-size:12px">-231 ₽</td><td style="padding:9px 8px;color:#666;font-size:12px">—</td><td style="padding:9px 8px;color:#8b5cf6;font-size:12px">-30 000 ₽</td><td style="padding:9px 8px;font-size:11px;color:#777;font-family:monospace">К213НЕ30</td><td style="padding:9px 8px;font-size:12px">143д</td><td style="padding:9px 8px"><span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px;background:#6366f122;color:#6366f1">Потенциал</span></td></tr><tr style="border-bottom:1px solid #1a1e2d"><td style="padding:9px 8px;color:#555;font-size:12px">17</td><td style="padding:9px 8px"><div style="font-weight:600;font-size:13px">Дорожкин Андрей Валерьевич</div><div style="font-size:11px;color:#555">+79899911299</div></td><td style="padding:9px 8px;color:#ef4444;font-weight:700">-44 783 ₽</td><td style="padding:9px 8px;color:#ef4444;font-size:12px">-21 527 ₽</td><td style="padding:9px 8px;color:#f59e0b;font-size:12px">-12 521 ₽</td><td style="padding:9px 8px;color:#666;font-size:12px">—</td><td style="padding:9px 8px;font-size:11px;color:#777;font-family:monospace">О526НР30</td><td style="padding:9px 8px;font-size:12px">259д</td><td style="padding:9px 8px"><span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px;background:#6366f122;color:#6366f1">Потенциал</span></td></tr><tr style="border-bottom:1px solid #1a1e2d"><td style="padding:9px 8px;color:#555;font-size:12px">18</td><td style="padding:9px 8px"><div style="font-weight:600;font-size:13px">Варданян Карен Васакович</div><div style="font-size:11px;color:#555">+79671558470</div></td><td style="padding:9px 8px;color:#ef4444;font-weight:700">-40 532 ₽</td><td style="padding:9px 8px;color:#ef4444;font-size:12px">-24 941 ₽</td><td style="padding:9px 8px;color:#f59e0b;font-size:12px">-15 591 ₽</td><td style="padding:9px 8px;color:#666;font-size:12px">—</td><td style="padding:9px 8px;font-size:11px;color:#777;font-family:monospace">Е160ОМ30</td><td style="padding:9px 8px;font-size:12px">142д</td><td style="padding:9px 8px"><span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px;background:#6366f122;color:#6366f1">Потенциал</span></td></tr><tr style="border-bottom:1px solid #1a1e2d"><td style="padding:9px 8px;color:#555;font-size:12px">19</td><td style="padding:9px 8px"><div style="font-weight:600;font-size:13px">Никулин Константин Алексеевич</div><div style="font-size:11px;color:#555">+79680065836</div></td><td style="padding:9px 8px;color:#ef4444;font-weight:700">-39 819 ₽</td><td style="padding:9px 8px;color:#ef4444;font-size:12px">-24 029 ₽</td><td style="padding:9px 8px;color:#f59e0b;font-size:12px">-15 715 ₽</td><td style="padding:9px 8px;color:#666;font-size:12px">—</td><td style="padding:9px 8px;font-size:11px;color:#777;font-family:monospace">Е645ОМ30</td><td style="padding:9px 8px;font-size:12px">133д</td><td style="padding:9px 8px"><span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px;background:#6366f122;color:#6366f1">Потенциал</span></td></tr><tr style="border-bottom:1px solid #1a1e2d"><td style="padding:9px 8px;color:#555;font-size:12px">20</td><td style="padding:9px 8px"><div style="font-weight:600;font-size:13px">Моряшин Егор Александрович</div><div style="font-size:11px;color:#555">+79870765605</div></td><td style="padding:9px 8px;color:#ef4444;font-weight:700">-34 583 ₽</td><td style="padding:9px 8px;color:#666;font-size:12px">—</td><td style="padding:9px 8px;color:#666;font-size:12px">-147 ₽</td><td style="padding:9px 8px;color:#8b5cf6;font-size:12px">-33 956 ₽</td><td style="padding:9px 8px;font-size:11px;color:#777;font-family:monospace">—</td><td style="padding:9px 8px;font-size:12px">0д</td><td style="padding:9px 8px"><span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px;background:#ef444422;color:#ef4444">Балласт</span></td></tr><tr style="border-bottom:1px solid #1a1e2d"><td style="padding:9px 8px;color:#555;font-size:12px">21</td><td style="padding:9px 8px"><div style="font-weight:600;font-size:13px">Алиев Искандарджон</div><div style="font-size:11px;color:#555">+79153288768</div></td><td style="padding:9px 8px;color:#ef4444;font-weight:700">-23 562 ₽</td><td style="padding:9px 8px;color:#ef4444;font-size:12px">-10 500 ₽</td><td style="padding:9px 8px;color:#666;font-size:12px">-2 534 ₽</td><td style="padding:9px 8px;color:#8b5cf6;font-size:12px">-10 500 ₽</td><td style="padding:9px 8px;font-size:11px;color:#777;font-family:monospace">Е584НЕ30</td><td style="padding:9px 8px;font-size:12px">70д</td><td style="padding:9px 8px"><span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px;background:#6366f122;color:#6366f1">Потенциал</span></td></tr><tr style="border-bottom:1px solid #1a1e2d"><td style="padding:9px 8px;color:#555;font-size:12px">22</td><td style="padding:9px 8px"><div style="font-weight:600;font-size:13px">Пнуш Владимир Ионович</div><div style="font-size:11px;color:#555">+79605978293</div></td><td style="padding:9px 8px;color:#ef4444;font-weight:700">-22 381 ₽</td><td style="padding:9px 8px;color:#ef4444;font-size:12px">-11 900 ₽</td><td style="padding:9px 8px;color:#f59e0b;font-size:12px">-9 203 ₽</td><td style="padding:9px 8px;color:#666;font-size:12px">—</td><td style="padding:9px 8px;font-size:11px;color:#777;font-family:monospace">К702РР30</td><td style="padding:9px 8px;font-size:12px">85д</td><td style="padding:9px 8px"><span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px;background:#6366f122;color:#6366f1">Потенциал</span></td></tr><tr style="border-bottom:1px solid #1a1e2d"><td style="padding:9px 8px;color:#555;font-size:12px">23</td><td style="padding:9px 8px"><div style="font-weight:600;font-size:13px">Тостаев Бада Викторович</div><div style="font-size:11px;color:#555">+79852684313</div></td><td style="padding:9px 8px;color:#ef4444;font-weight:700">-19 883 ₽</td><td style="padding:9px 8px;color:#666;font-size:12px">-1 175 ₽</td><td style="padding:9px 8px;color:#666;font-size:12px">-3 345 ₽</td><td style="padding:9px 8px;color:#8b5cf6;font-size:12px">-14 363 ₽</td><td style="padding:9px 8px;font-size:11px;color:#777;font-family:monospace">М583НР30</td><td style="padding:9px 8px;font-size:12px">180д</td><td style="padding:9px 8px"><span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px;background:#22c55e22;color:#22c55e">Стабильный</span></td></tr><tr style="border-bottom:1px solid #1a1e2d"><td style="padding:9px 8px;color:#555;font-size:12px">24</td><td style="padding:9px 8px"><div style="font-weight:600;font-size:13px">Мухлаева Светлана Сергеевна</div><div style="font-size:11px;color:#555">+79897951156</div></td><td style="padding:9px 8px;color:#ef4444;font-weight:700">-19 592 ₽</td><td style="padding:9px 8px;color:#ef4444;font-size:12px">-6 000 ₽</td><td style="padding:9px 8px;color:#f59e0b;font-size:12px">-12 012 ₽</td><td style="padding:9px 8px;color:#666;font-size:12px">—</td><td style="padding:9px 8px;font-size:11px;color:#777;font-family:monospace">Х928НУ30</td><td style="padding:9px 8px;font-size:12px">92д</td><td style="padding:9px 8px"><span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px;background:#6366f122;color:#6366f1">Потенциал</span></td></tr></tbody>
+      <tbody id="debtBody"></tbody>
     </table>
     </div>
     <div style="margin-top:10px;font-size:12px;color:#555;text-align:center">Показаны 24 должников · Данные 1С:Такси · 09.04.2026</div>
@@ -272,77 +253,8 @@ tr:hover td{background:rgba(255,255,255,.02)}
 
 <!-- АЛЕРТЫ -->
 <div id="t-alerts" style="display:none">
-  <div class="card">
-    <div class="st">🔴 Критические — сегодня</div>
-    <div class="al al-r"><div class="at">12 авто ездят с просроченным ОСАГО</div><div class="as">4 × Москвич 3 (с сентября 2023!!) · 7 × Haval Jolion · Chery Arrizo 8 · 2 × LADA Granta · штраф + полная ответственность при ДТП</div></div>
-    <div class="al al-r"><div class="at">7 авто с истёкшим техосмотром</div><div class="as">В354РР30 BELGEE X50 — истекает 11.04.2026 (через 2 дня!) · А470НР30, Н936НР30, О143НР30, Е919НР30 — уже просрочены</div></div>
-    <div class="al al-r"><div class="at">9 водителей с долгом более 50 000 ₽</div><div class="as">Бехоев −533К · Канцедал −198К · Фоменко −144К · Хутов −140К · Туровский −129К · требуют немедленного контакта</div></div>
-    <div class="al al-r"><div class="at">6 авто в статусе ТОТАЛ — страховые выплаты</div><div class="as">А809НЕ30 · Х404НО30 · М664НР30 · В967НР30 · О782НР30 · Т761НР30 — уточнить статус и суммы выплат</div></div>
-    <div class="st" style="margin-top:16px">🟡 Предупреждения — на неделе</div>
-    <div class="al al-a"><div class="at">181 водитель без медосмотра более 30 дней</div><div class="as">Максимум: 748 дней (Р271НР30, Lada Vesta). Системная проблема — осмотры не проводятся вообще.</div></div>
-    <div class="al al-a"><div class="at">Пени: 642К ₽ — растут каждый день</div><div class="as">Накоплены по всему парку. Работа с должниками — главный приоритет этой недели.</div></div>
-    <div class="al al-a"><div class="at">37 новых водителей (стаж менее 30 дней)</div><div class="as">Самый рискованный период. Усиленный контроль обязателен — высокий риск невозврата долга.</div></div>
-    <div class="st" style="margin-top:16px">🟢 Возможности</div>
-    <div class="al al-b"><div class="at">124 ветерана (более 1 года) — приоритет удержания</div><div class="as">Потеря одного = 3-4 месяца на поиск и обучение замены. Бонусная программа и лучшие авто.</div></div>
-    <div class="al al-b"><div class="at">55 водителей с положительным балансом — лояльная аудитория</div><div class="as">Платят вперёд. Кандидаты на апгрейд условий и реферальную программу.</div></div>
-    <div class="al al-b"><div class="at">API 1С настраивается — скоро автообновление</div><div class="as">Поддержка 0nalog.com открывает доступ к HTTP-сервисам. После этого данные будут обновляться каждый час автоматически.</div></div>
-  </div>
-</div>
-
-</div>
-<script>
-const CARS_DATA=[{"p":"К615НР30","d":"","st":"paint","stl":"Малярка","m":"Москвич 3","y":"2023","km":0,"ins":0,"osago":"12.09.2023","od":-939,"to":"","td":9999},{"p":"М583НР30","d":"Тостаев Бада","st":"online","stl":"На линии","m":"Москвич 3","y":"2023","km":12400,"ins":45,"osago":"12.09.2023","od":-939,"to":"","td":9999},{"p":"К542НР30","d":"Зарипов Ринат","st":"online","stl":"На линии","m":"Москвич 3","y":"2023","km":18900,"ins":120,"osago":"12.09.2023","od":-939,"to":"","td":9999},{"p":"М585НР30","d":"","st":"online","stl":"На линии","m":"Москвич 3","y":"2023","km":0,"ins":0,"osago":"12.09.2023","od":-939,"to":"","td":9999},{"p":"Е919НР30","d":"Изетов С.С.","st":"online","stl":"На линии","m":"Haval F7","y":"2022","km":104000,"ins":250,"osago":"15.11.2024","od":-510,"to":"12.02.2026","td":-55},{"p":"Р919НР30","d":"Синитенков С.В.","st":"online","stl":"На линии","m":"Haval Jolion","y":"2022","km":94200,"ins":709,"osago":"02.03.2024","od":-402,"to":"","td":9999},{"p":"В628НР30","d":"Бархатов Р.З.","st":"online","stl":"На линии","m":"Haval Jolion","y":"2022","km":87100,"ins":400,"osago":"02.03.2024","od":-402,"to":"","td":9999},{"p":"Е191НР30","d":"Нуралиев Аслан","st":"online","stl":"На линии","m":"Haval Jolion","y":"2022","km":91000,"ins":350,"osago":"02.03.2024","od":-402,"to":"","td":9999},{"p":"К942НЕ30","d":"Бархатов Р.А.","st":"online","stl":"На линии","m":"Chery Tiggo 4 Pro","y":"2023","km":54000,"ins":40,"osago":"04.06.2026","od":56,"to":"07.01.2026","td":-92},{"p":"А470НР30","d":"Перепелков А.Ю.","st":"online","stl":"На линии","m":"Chery Tiggo 4 Pro","y":"2023","km":67000,"ins":180,"osago":"","od":9999,"to":"07.01.2026","td":-92},{"p":"К596РР30","d":"Марупов С.Р.","st":"online","stl":"На линии","m":"LADA Granta","y":"2024","km":43200,"ins":60,"osago":"04.02.2026","od":-63,"to":"","td":9999},{"p":"В942НР30","d":"Шитик К.Э.","st":"online","stl":"На линии","m":"LADA Granta","y":"2024","km":38700,"ins":55,"osago":"04.02.2026","od":-63,"to":"","td":9999},{"p":"Н936НР30","d":"Панчулидзе З.А.","st":"online","stl":"На линии","m":"Haval Jolion","y":"2022","km":89000,"ins":200,"osago":"","od":9999,"to":"07.02.2026","td":-60},{"p":"О143НР30","d":"Табелов С.Н.","st":"online","stl":"На линии","m":"Haval Jolion","y":"2022","km":92000,"ins":220,"osago":"","od":9999,"to":"09.02.2026","td":-58},{"p":"В131НЕ30","d":"","st":"repair","stl":"Тех. ремонт","m":"Chery Tiggo 4","y":"2023","km":0,"ins":0,"osago":"28.02.2026","od":-40,"to":"16.03.2026","td":-24},{"p":"К213НЕ30","d":"Краевский Э.Ч.","st":"online","stl":"На линии","m":"Haval F7","y":"2022","km":97000,"ins":143,"osago":"","od":9999,"to":"11.03.2026","td":-29},{"p":"О759НХ30","d":"Орлов Р.Г.","st":"online","stl":"На линии","m":"Chery Arrizo 8","y":"2025","km":21000,"ins":30,"osago":"04.04.2026","od":-5,"to":"","td":9999},{"p":"В354РР30","d":"Марин Ион Иванович","st":"online","stl":"На линии","m":"BELGEE X50","y":"2024","km":49744,"ins":32,"osago":"01.12.2026","od":236,"to":"11.04.2026","td":2},{"p":"О808НХ30","d":"Асрабоев А.Ж.","st":"online","stl":"На линии","m":"LADA Granta","y":"2025","km":18900,"ins":20,"osago":"04.05.2026","od":25,"to":"","td":9999},{"p":"С426НР30","d":"Белых В.О.","st":"online","stl":"На линии","m":"Haval Jolion","y":"2022","km":88000,"ins":90,"osago":"","od":9999,"to":"09.05.2026","td":30},{"p":"В347РР30","d":"Рамазанов Шамиль","st":"online","stl":"На линии","m":"BELGEE X50","y":"2024","km":93969,"ins":122,"osago":"13.11.2026","od":218,"to":"","td":9999},{"p":"В362РР30","d":"Осмонали Уулу Анарбай","st":"online","stl":"На линии","m":"BELGEE X50","y":"2024","km":49744,"ins":32,"osago":"01.12.2026","od":236,"to":"","td":9999},{"p":"О713НХ30","d":"","st":"repair","stl":"Тех. ремонт","m":"Chery Arrizo 8","y":"2024","km":0,"ins":0,"osago":"","od":9999,"to":"","td":9999},{"p":"К962НЕ30","d":"","st":"repair","stl":"Тех. ремонт","m":"Chery Tiggo 4 Pro","y":"2023","km":0,"ins":0,"osago":"","od":9999,"to":"","td":9999},{"p":"М639НР30","d":"Ионов И.В.","st":"repair","stl":"Тех. ремонт","m":"Geely Atlas Pro","y":"2023","km":0,"ins":0,"osago":"","od":9999,"to":"","td":9999},{"p":"М931НР30","d":"","st":"repair","stl":"Тех. ремонт","m":"LADA Granta","y":"2023","km":0,"ins":0,"osago":"","od":9999,"to":"","td":9999},{"p":"Н990НР30","d":"","st":"repair","stl":"Тех. ремонт","m":"LADA Granta","y":"2024","km":0,"ins":0,"osago":"","od":9999,"to":"","td":9999},{"p":"Е401НР30","d":"","st":"repair","stl":"Тех. ремонт","m":"LADA Granta","y":"2024","km":0,"ins":0,"osago":"","od":9999,"to":"","td":9999},{"p":"О580НР30","d":"","st":"repair","stl":"Тех. ремонт","m":"LADA Granta","y":"2023","km":0,"ins":0,"osago":"","od":9999,"to":"","td":9999},{"p":"С374НР30","d":"","st":"paint","stl":"Малярка","m":"Haval Jolion","y":"2022","km":0,"ins":0,"osago":"","od":9999,"to":"","td":9999},{"p":"О442НР30","d":"","st":"paint","stl":"Малярка","m":"Haval Jolion","y":"2022","km":0,"ins":0,"osago":"","od":9999,"to":"","td":9999},{"p":"О174НР30","d":"","st":"paint","stl":"Малярка","m":"LADA Granta","y":"2023","km":0,"ins":0,"osago":"","od":9999,"to":"","td":9999},{"p":"А809НЕ30","d":"","st":"total","stl":"Тотал","m":"Chery Tiggo 4 Pro","y":"2023","km":0,"ins":0,"osago":"","od":9999,"to":"","td":9999},{"p":"Х404НО30","d":"","st":"total","stl":"Тотал","m":"Chery Tiggo 7 Pro Max","y":"2023","km":0,"ins":0,"osago":"","od":9999,"to":"","td":9999},{"p":"М664НР30","d":"","st":"total","stl":"Тотал","m":"Geely Atlas Pro","y":"2023","km":0,"ins":0,"osago":"","od":9999,"to":"","td":9999},{"p":"В967НР30","d":"","st":"total","stl":"Тотал","m":"LADA Granta","y":"2022","km":67000,"ins":734,"osago":"","od":9999,"to":"","td":9999},{"p":"О782НР30","d":"","st":"total","stl":"Тотал","m":"LADA Granta","y":"2023","km":0,"ins":0,"osago":"","od":9999,"to":"","td":9999},{"p":"Т761НР30","d":"","st":"total","stl":"Тотал","m":"LADA Granta","y":"2023","km":0,"ins":0,"osago":"","od":9999,"to":"","td":9999}];
-function show(id,btn){['dash','fleet','docs','debt','alerts'].forEach(t=>document.getElementById('t-'+t).style.display=t===id?'':'none');document.querySelectorAll('.nb').forEach(b=>b.classList.remove('on'));if(btn)btn.classList.add('on');}
-function filterCars(f,btn){
-  document.querySelectorAll('#flFilter .fp').forEach(b=>b.classList.remove('on'));btn.classList.add('on');
-  const rows=CARS_DATA.filter(c=>{
-    if(f==='all')return true;
-    if(f==='crit')return(c.od<0&&c.od>-9000)||(c.td<0&&c.td>-9000);
-    if(f==='repair')return c.st==='repair'||c.st==='paint'||c.st==='wash';
-    if(f==='total')return c.st==='total';
-    if(f==='free')return c.st==='free';
-    return true;
-  });
-  document.getElementById('carsBody').innerHTML=rows.map(c=>{
-    function dl(d){if(d>9000)return'—';if(d<0)return'<span style="color:#ef4444;font-weight:700">Просрочено '+Math.abs(d)+'д</span>';if(d<=7)return'<span style="color:#ef4444;font-weight:700">'+d+' дн.!</span>';if(d<=30)return'<span style="color:#f59e0b;font-weight:600">'+d+' дн.</span>';return'<span style="color:#666">'+d+' дн.</span>';}
-    const ST2={online:{l:'На линии',c:'#22c55e'},repair:{l:'Ремонт',c:'#ef4444'},paint:{l:'Малярка',c:'#f59e0b'},free:{l:'Свободна',c:'#6366f1'},total:{l:'Тотал',c:'#dc2626'},wash:{l:'Мойка',c:'#0ea5e9'},other:{l:'Иное',c:'#888'}};
-    const s=ST2[c.st]||ST2.other;
-    return '<tr style="border-bottom:1px solid #1a1e2d"><td style="padding:9px 8px;font-family:monospace;font-size:12px;font-weight:600;color:#dde1ef">'+c.p+'</td><td style="padding:9px 8px"><span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px;background:'+s.c+'22;color:'+s.c+'">'+s.l+'</span></td><td style="padding:9px 8px;font-size:13px">'+c.m+'</td><td style="padding:9px 8px;font-size:12px;color:#888">'+c.y+'</td><td style="padding:9px 8px;font-size:12px;color:#777">'+( c.d||'—')+'</td><td style="padding:9px 8px;font-size:12px">'+( c.km>0?c.km.toLocaleString('ru-RU')+' км':'—')+'</td><td style="padding:9px 8px;font-size:12px">'+(c.osago||'—')+'<br>'+dl(c.od)+'</td><td style="padding:9px 8px;font-size:12px">'+(c.to||'—')+'<br>'+dl(c.td)+'</td><td style="padding:9px 8px;font-size:12px;color:'+(c.ins>30?'#ef4444':'#666')+'">'+( c.ins>0?c.ins+'д':'✓')+'</td></tr>';
-  }).join('');
-}
-function filterDebt(){
-  const q=document.getElementById('ds').value.toLowerCase();
-  document.querySelectorAll('#debtBody tr').forEach(row=>{
-    row.style.display=!q||row.textContent.toLowerCase().includes(q)?'':'none';
-  });
-}
-</script>
-
-<!-- Upload Modal -->
-<div id="uploadModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:999;align-items:center;justify-content:center">
-<div style="background:#0d1117;border:1px solid #1a1e2d;border-radius:16px;padding:28px;width:500px;max-width:95vw">
-  <h2 style="font-size:16px;font-weight:700;margin-bottom:6px;color:#dde1ef">📂 Обновить данные из 1С</h2>
-  <p style="font-size:13px;color:#666;margin-bottom:20px">Выгрузи файлы из 1С:Такси → загрузи сюда → данные обновятся мгновенно</p>
-  
-  <div id="zone1" style="border:2px dashed #1a1e2d;border-radius:12px;padding:24px;text-align:center;cursor:pointer;position:relative;margin-bottom:8px" ondragover="event.preventDefault();this.style.borderColor='#6366f1'" ondragleave="this.style.borderColor='#1a1e2d'" ondrop="dropFile(event,'drivers','zone1')">
-    <input type="file" accept=".xlsx,.xls,.mxl" style="position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%" onchange="loadFile(this,'drivers','zone1')">
-    <div style="font-size:26px;margin-bottom:8px">👤</div>
-    <div id="zone1-title" style="font-size:14px;font-weight:600;color:#dde1ef;margin-bottom:4px">Список водителей (MXL или XLSX)</div>
-    <div style="font-size:12px;color:#555">Водители → Сохранить в Excel</div>
-  </div>
-  <div id="status1" style="font-size:12px;min-height:18px;margin-bottom:10px;padding-left:4px"></div>
-
-  <div id="zone2" style="border:2px dashed #1a1e2d;border-radius:12px;padding:24px;text-align:center;cursor:pointer;position:relative;margin-bottom:8px" ondragover="event.preventDefault();this.style.borderColor='#6366f1'" ondragleave="this.style.borderColor='#1a1e2d'" ondrop="dropFile(event,'cars','zone2')">
-    <input type="file" accept=".xlsx,.xls" style="position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%" onchange="loadFile(this,'cars','zone2')">
-    <div style="font-size:26px;margin-bottom:8px">🚗</div>
-    <div id="zone2-title" style="font-size:14px;font-weight:600;color:#dde1ef;margin-bottom:4px">Список автомобилей (XLSX)</div>
-    <div style="font-size:12px;color:#555">Автопарк → Сохранить в Excel</div>
-  </div>
-  <div id="status2" style="font-size:12px;min-height:18px;margin-bottom:16px;padding-left:4px"></div>
-
-  <div style="display:flex;gap:8px;justify-content:flex-end">
-    <button onclick="closeModal()" style="padding:8px 18px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:none;background:#1a1e2d;color:#888">Отмена</button>
-    <button id="applyBtn" onclick="applyData()" disabled style="padding:8px 18px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:none;background:#6366f1;color:#fff;opacity:.4">Применить</button>
+  <div class="card" id="alertsCard">
+    <div style="text-align:center;padding:20px;color:#555;font-size:13px">Загрузи данные через «📂 Обновить данные»</div>
   </div>
 </div>
 
@@ -392,6 +304,48 @@ function filterDebt(){
     </table></div>
   </div>
 </div>
+
+<!-- МЕНЕДЖЕРЫ -->
+<div id="t-mgr" style="display:none">
+  <div id="mgr-empty" class="card" style="text-align:center;padding:32px">
+    <div style="font-size:28px;margin-bottom:10px">👥</div>
+    <div style="font-size:14px;font-weight:600;color:#dde1ef;margin-bottom:6px">Загрузи файл операций</div>
+    <div style="font-size:13px;color:#555">Нажми «📂 Обновить данные» → загрузи файл «Операции Яндекс Таксометр»<br>Появится статистика по каждому менеджеру</div>
+  </div>
+
+  <div id="mgr-content" style="display:none">
+    <div id="mgr-cards" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin-bottom:16px"></div>
+
+    <div class="g2" style="margin-bottom:14px">
+      <div class="card">
+        <div class="st">Наличные и переводы — сегодня</div>
+        <div id="mgr-cash"></div>
+      </div>
+      <div class="card">
+        <div class="st">Активность по часам</div>
+        <div style="position:relative;height:120px"><canvas id="mgrHourChart" role="img" aria-label="Активность менеджеров по часам"></canvas></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:14px">
+        <div class="st" style="margin:0">Лента операций менеджеров</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap" id="mgr-filter-btns">
+          <button onclick="filterMgrOps('all',this)" class="fp on">Все</button>
+          <button onclick="filterMgrOps('cash',this)" class="fp">💵 Наличные</button>
+          <button onclick="filterMgrOps('correction',this)" class="fp">✏️ Корректировки</button>
+          <button onclick="filterMgrOps('penalty',this)" class="fp">⚠️ Штрафы/Пени</button>
+        </div>
+      </div>
+      <div style="overflow-x:auto"><table>
+        <thead><tr>
+          <th>Время</th><th>Менеджер</th><th>Водитель</th><th>Операция</th><th>Приход</th><th>Расход</th><th>Способ</th><th>Комментарий</th>
+        </tr></thead>
+        <tbody id="mgr-ops-body"></tbody>
+      </table></div>
+    </div>
+  </div>
+</div>
 </div>
 
 <script>
@@ -428,6 +382,19 @@ function processFile(file,type,zoneId){
       const wb=XLSX.read(e.target.result,{type:'array',cellDates:true});
       const ws=wb.Sheets[wb.SheetNames[0]];
       const rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
+      if(type==='ops'){
+        const parsed=_parseOps(rows);
+        if(parsed.length>0){
+          window._pendingOps=parsed;
+          document.getElementById(zoneId).style.borderColor='#22c55e';
+          ti.style.color='#22c55e'; ti.textContent='✓ '+file.name+' ('+parsed.length+' оп. менеджеров)';
+          st.style.color='#22c55e'; st.textContent='✅ Найдено '+parsed.length+' операций менеджеров';
+          const ok=!!(_pendingDrivers||_pendingCars||window._pendingOps);
+          document.getElementById('applyBtn').disabled=!ok;
+          document.getElementById('applyBtn').style.opacity=ok?'1':'.4';
+        } else { st.style.color='#ef4444'; st.textContent='❌ Операции менеджеров не найдены'; }
+        return;
+      }
       if(type==='drivers'){
         const parsed=_parseDrivers(rows);
         if(parsed.length>0){
@@ -587,6 +554,7 @@ function applyData(){
   const now=new Date().toLocaleDateString('ru-RU')+' '+new Date().toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});
   if(_pendingDrivers){ DRIVERS=_pendingDrivers; }
   if(_pendingCars){ CARS=_pendingCars; }
+  if(window._pendingOps){ OPS=window._pendingOps; }
   UPDATED=now+' (загружено из файла)';
   closeModal();
   _saveSnap();
@@ -664,6 +632,15 @@ function _refreshAll(){
   // Документы
   _refreshDocs();
   
+  // Скрываем welcome экран
+  const wel=document.getElementById('t-welcome');
+  if(wel) wel.style.display='none';
+  // Переключаем на Сводку
+  const dash=document.getElementById('t-dash');
+  if(dash) dash.style.display='';
+  document.querySelectorAll('.nb').forEach(b=>b.classList.remove('on'));
+  const firstBtn=document.querySelector('.nb');
+  if(firstBtn) firstBtn.classList.add('on');
   console.log('✅ Данные обновлены:', D.length, 'водителей,', C.length, 'авто');
 }
 
@@ -857,4 +834,203 @@ window.show = function(id, btn){
 };
 </script>
 
+
+<script>
+// ═══════ ОПЕРАЦИИ / МЕНЕДЖЕРЫ ═══════
+let OPS = [];
+let _mgrFilter = 'all';
+
+function _parseOps(rows){
+  // Заголовки в строке 0
+  let hi = -1;
+  const cols = {};
+  for(let i = 0; i < Math.min(rows.length, 5); i++){
+    const r = rows[i];
+    for(let j = 0; j < r.length; j++){
+      const v = String(r[j]||'').trim();
+      if(v === 'Дата операции'){ hi = i; cols.date = j; }
+      if(v === 'Время операции') cols.time = j;
+      if(v === 'Водитель') cols.driver = j;
+      if(v === 'Приход') cols.income = j;
+      if(v === 'Расход') cols.expense = j;
+      if(v === 'Группа') cols.group = j;
+      if(v === 'Описание') cols.desc = j;
+      if(v === 'Пользователь') cols.user = j;
+      if(v === 'Способ оплаты') cols.pay = j;
+      if(v === 'Ручная корректировка') cols.manual = j;
+      if(v === 'Раздел баланса') cols.section = j;
+    }
+    if(hi >= 0) break;
+  }
+  if(hi < 0) return [];
+
+  const res = [];
+  for(let i = hi + 1; i < rows.length; i++){
+    const r = rows[i];
+    const user = String(r[cols.user]||'').trim();
+    if(!user || user === 'nan') continue; // только операции с менеджером
+    const driver = String(r[cols.driver]||'').trim();
+    if(!driver || driver === 'nan') continue;
+    const income  = parseFloat(String(r[cols.income]||0).replace(',','.')) || 0;
+    const expense = parseFloat(String(r[cols.expense]||0).replace(',','.')) || 0;
+    const pay     = String(r[cols.pay]||'').trim();
+    const group   = String(r[cols.group]||'').trim();
+    const desc    = String(r[cols.desc]||'').trim().replace('nan','');
+    const time    = String(r[cols.time]||'').trim();
+    const date    = String(r[cols.date]||'').trim();
+
+    // Тип операции для фильтра
+    let opType = 'other';
+    if(pay === 'Наличные' || pay === 'Карта алексей') opType = 'cash';
+    else if(group.includes('Коррекц') || group.includes('Сторно') || desc.includes('Сторно')) opType = 'correction';
+    else if(group.includes('Пени') || group.includes('Штраф') || group.includes('ДТП') || group.includes('Повреждения')) opType = 'penalty';
+
+    res.push({ date, time, driver, income, expense, group, desc, user, pay, opType });
+  }
+  return res;
+}
+
+function _renderManagers(){
+  if(!OPS.length){
+    document.getElementById('mgr-empty').style.display = '';
+    document.getElementById('mgr-content').style.display = 'none';
+    return;
+  }
+  document.getElementById('mgr-empty').style.display = 'none';
+  document.getElementById('mgr-content').style.display = '';
+
+  // Карточки по менеджерам
+  const byMgr = {};
+  OPS.forEach(op => {
+    if(!byMgr[op.user]) byMgr[op.user] = {ops:[], income:0, expense:0, drivers:new Set()};
+    byMgr[op.user].ops.push(op);
+    byMgr[op.user].income += op.income;
+    byMgr[op.user].expense += op.expense;
+    byMgr[op.user].drivers.add(op.driver);
+  });
+
+  const colors = ['#6366f1','#22c55e','#f59e0b','#ef4444','#0ea5e9','#8b5cf6'];
+  let ci = 0;
+  document.getElementById('mgr-cards').innerHTML = Object.entries(byMgr).map(([name, d]) => {
+    const c = colors[ci++ % colors.length];
+    const net = d.income - d.expense;
+    return '<div class="card" style="border-left:3px solid '+c+'">' +
+      '<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">' +
+        '<div style="width:36px;height:36px;border-radius:50%;background:'+c+'22;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;color:'+c+'">'+name[0].toUpperCase()+'</div>' +
+        '<div><div style="font-weight:600;font-size:14px;color:#dde1ef">'+name+'</div>' +
+        '<div style="font-size:12px;color:#555">'+d.ops.length+' опер. · '+d.drivers.size+' водителей</div></div>' +
+      '</div>' +
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">' +
+        '<div style="background:#111520;border-radius:8px;padding:8px 10px"><div style="font-size:11px;color:#555;margin-bottom:3px">Приход</div><div style="font-size:15px;font-weight:600;color:#22c55e">'+_fmtM(d.income)+'</div></div>' +
+        '<div style="background:#111520;border-radius:8px;padding:8px 10px"><div style="font-size:11px;color:#555;margin-bottom:3px">Расход</div><div style="font-size:15px;font-weight:600;color:#ef4444">'+_fmtM(d.expense)+'</div></div>' +
+      '</div>' +
+      '<div style="margin-top:8px;font-size:12px;color:'+(net>=0?'#22c55e':'#ef4444')+'">Сальдо: '+(net>=0?'+':'')+_fmtM(net)+'</div>' +
+      '<div style="margin-top:8px">' + _mgrDriverBadges(d.drivers) + '</div>' +
+    '</div>';
+  }).join('');
+
+  // Наличные и переводы
+  const cash = OPS.filter(o => o.opType === 'cash');
+  document.getElementById('mgr-cash').innerHTML = cash.length === 0
+    ? '<div style="color:#555;font-size:13px">Наличных операций нет</div>'
+    : cash.map(o => '<div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid #1a1e2d;gap:8px">' +
+        '<div>' +
+          '<div style="font-size:13px;font-weight:600;color:#dde1ef">'+o.driver+'</div>' +
+          '<div style="font-size:11px;color:#555;margin-top:2px">'+o.time+' · '+o.user+' · '+o.pay+'</div>' +
+          (o.desc ? '<div style="font-size:11px;color:#666;margin-top:2px">'+o.desc+'</div>' : '') +
+        '</div>' +
+        '<div style="font-size:14px;font-weight:700;color:'+(o.income>0?'#22c55e':'#ef4444');+';flex-shrink:0">'+(o.income>0?'+':'-')+_fmtM(o.income||o.expense)+'</div>' +
+      '</div>').join('');
+
+  // График по часам
+  _renderHourChart();
+
+  // Лента
+  _renderMgrOps();
+}
+
+function _mgrDriverBadges(driversSet){
+  return Array.from(driversSet).map(d => {
+    const short = d.split(' ').slice(0,2).join(' ');
+    return '<span style="font-size:10px;padding:2px 7px;border-radius:4px;background:#1a1e2d;color:#888;display:inline-block;margin:2px">'+short+'</span>';
+  }).join('');
+}
+
+function _fmtM(n){ const a=Math.abs(n); if(a>=1000) return Math.round(a/1000)+'К ₽'; return Math.round(a)+' ₽'; }
+
+function _renderHourChart(){
+  const canvas = document.getElementById('mgrHourChart');
+  if(!canvas || typeof Chart === 'undefined') return;
+  const hours = Array(24).fill(0);
+  OPS.forEach(op => {
+    const h = parseInt((op.time||'0').split(':')[0]) || 0;
+    hours[h]++;
+  });
+  if(window._mgrHChart) window._mgrHChart.destroy();
+  window._mgrHChart = new Chart(canvas, {
+    type: 'bar',
+    data: {
+      labels: hours.map((_,i) => i+'ч'),
+      datasets:[{ data: hours, backgroundColor: '#6366f188', borderColor: '#6366f1', borderWidth: 1 }]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{display:false} },
+      scales:{
+        x:{ grid:{color:'rgba(255,255,255,.04)'}, ticks:{color:'#555',font:{size:9},maxRotation:0,autoSkip:true,maxTicksLimit:8} },
+        y:{ grid:{color:'rgba(255,255,255,.04)'}, ticks:{color:'#555',font:{size:9}} }
+      }
+    }
+  });
+}
+
+function filterMgrOps(f, btn){
+  _mgrFilter = f;
+  document.querySelectorAll('#mgr-filter-btns .fp').forEach(b=>{ b.classList.remove('on'); });
+  if(btn) btn.classList.add('on');
+  _renderMgrOps();
+}
+
+function _renderMgrOps(){
+  const ops = _mgrFilter === 'all' ? OPS : OPS.filter(o => o.opType === _mgrFilter);
+  const sorted = [...ops].sort((a,b) => b.time.localeCompare(a.time));
+
+  const payColors = { 'Наличные':'#22c55e', 'Карта алексей':'#f59e0b', 'Внутренний':'#6366f1', 'Прочие':'#888' };
+
+  document.getElementById('mgr-ops-body').innerHTML = sorted.map(op => {
+    const pc = payColors[op.pay] || '#555';
+    return '<tr style="border-bottom:1px solid #111520">' +
+      '<td style="padding:8px;font-size:12px;color:#888;white-space:nowrap">'+op.time+'</td>' +
+      '<td style="padding:8px;font-size:13px;font-weight:600;color:#dde1ef">'+op.user+'</td>' +
+      '<td style="padding:8px;font-size:12px;color:#aaa">'+op.driver.split(' ').slice(0,2).join(' ')+'</td>' +
+      '<td style="padding:8px;font-size:12px;color:#dde1ef">'+op.group+'</td>' +
+      '<td style="padding:8px;font-size:12px;color:#22c55e;font-weight:600">'+(op.income>0?'+'+_fmtM(op.income):'—')+'</td>' +
+      '<td style="padding:8px;font-size:12px;color:#ef4444;font-weight:600">'+(op.expense>0?'-'+_fmtM(op.expense):'—')+'</td>' +
+      '<td style="padding:8px"><span style="font-size:11px;padding:2px 7px;border-radius:4px;background:'+pc+'22;color:'+pc+'">'+op.pay+'</span></td>' +
+      '<td style="padding:8px;font-size:11px;color:#555;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+op.desc+'">'+( op.desc||'—')+'</td>' +
+    '</tr>';
+  }).join('');
+}
+
+// Переопределяем show для менеджеров
+const _origShow2 = window.show;
+window.show = function(id, btn){
+  _origShow2(id, btn);
+  if(id === 'mgr') _renderManagers();
+};
+</script>
+
+<script>
+// Инициализация — показываем welcome если нет данных
+(function(){
+  const hasDr = typeof DRIVERS !== 'undefined' && DRIVERS.length > 0;
+  const hasCr = typeof CARS !== 'undefined' && CARS.length > 0;
+  if(!hasDr && !hasCr){
+    const w = document.getElementById('t-welcome');
+    const d = document.getElementById('t-dash');
+    if(w) w.style.display = '';
+    if(d) d.style.display = 'none';
+  }
+})();
+</script>
 </body></html>
