@@ -204,7 +204,7 @@ tr:hover td{background:rgba(255,255,255,.02)}
   </div>
   <div class="g4" id="dyn-cards"></div>
   <div class="card">
-    <div style="position:relative;width:100%;height:260px">
+    <div style="position:relative;width:100%;height:280px">
       <canvas id="dynChart" role="img" aria-label="График динамики"></canvas>
     </div>
     <div id="dyn-legend" style="margin-top:8px;font-size:12px;color:#555"></div>
@@ -540,9 +540,9 @@ function refreshAll(){
   // Метрики сводки ряд 1
   document.getElementById('metrics-top').innerHTML=[
     {l:'Суммарный долг',v:fmt(Math.abs(totalDebt)),s:debtors.length+' водителей в минусе',c:'red'},
+    {l:'Долг по аренде',v:fmt(Math.abs(rentDebt)),s:'Основной долг парка',c:'red'},
     {l:'КПД парка',v:kpd+'%',s:`${online} из ${C.length} авто на линии`,c:'grn'},
     {l:'ОСАГО просрочено',v:osagoExp+'',s:'Ездят без страховки!',c:'red'},
-    {l:'Без осмотра >30д',v:inspOvr+'',s:'Юридический риск',c:'amb'},
   ].map(m=>`<div class="met"><div class="ml">${m.l}</div><div class="mv ${m.c}">${m.v}</div><div class="ms">${m.s}</div></div>`).join('');
 
   // Метрики ряд 2
@@ -705,8 +705,13 @@ function saveSnap(){
   const today=new Date().toISOString().slice(0,10);
   const snaps=getSnaps();
   const idx=snaps.findIndex(s=>s.date===today);
-  const snap={date:today,debt:D.reduce((s,d)=>s+(d.t<0?d.t:0),0),debtors:D.filter(d=>d.t<-100).length,online:C.filter(c=>c.st==='online').length,total:C.length,kpd:C.length?Math.round(C.filter(c=>c.st==='online').length/C.length*100):0,osago:C.filter(c=>c.od<0&&c.od>-9000).length,toExp:C.filter(c=>c.td<0&&c.td>-9000).length,insp:D.filter(d=>d.ins>30).length,ts:Date.now()};
-  if(idx>=0)snaps[idx]=snap;else snaps.push(snap);
+  const snap={date:today,debt:D.reduce((s,d)=>s+(d.t<0?d.t:0),0),rent:D.reduce((s,d)=>s+(d.r<0?d.r:0),0),rent:D.reduce((s,d)=>s+(d.r<0?d.r:0),0),debtors:D.filter(d=>d.t<-100).length,online:C.filter(c=>c.st==='online').length,total:C.length,kpd:C.length?Math.round(C.filter(c=>c.st==='online').length/C.length*100):0,osago:C.filter(c=>c.od<0&&c.od>-9000).length,toExp:C.filter(c=>c.td<0&&c.td>-9000).length,insp:D.filter(d=>d.ins>30).length,ts:Date.now()};
+  if(idx>=0)snaps[idx]=snap;
+  else snaps.push(snap);
+  snaps.sort((a,b)=>a.date.localeCompare(b.date));
+  localStorage.setItem(SNAP_KEY,JSON.stringify(snaps.slice(-90)));
+  console.log('Снапшот сохранён:',today,snap);
+}else snaps.push(snap);
   snaps.sort((a,b)=>a.date.localeCompare(b.date));
   localStorage.setItem(SNAP_KEY,JSON.stringify(snaps.slice(-90)));
 }
@@ -733,8 +738,8 @@ function renderDyn(){
   const empty=document.getElementById('dyn-empty');
   const canvas=document.getElementById('dynChart');
   if(!canvas)return;
-  if(!snaps.length){empty.style.display='';canvas.parentElement.style.display='none';return;}
-  empty.style.display='none';canvas.parentElement.style.display='';
+  if(!snaps.length){empty.style.display='';canvas.style.display='none';return;}
+  empty.style.display='none';canvas.style.display='';
   // Карточки
   const last=snaps[snaps.length-1],prev=snaps.length>1?snaps[snaps.length-2]:null;
   function chg(key,inv){if(!prev)return'';const d=last[key]-prev[key];if(d===0)return'';const up=d>0;const c=inv?(up?'#ef4444':'#22c55e'):(up?'#22c55e':'#ef4444');const val=key==='debt'?fmtD(Math.abs(d)):key==='kpd'?Math.abs(d)+'%':Math.abs(d);return`<span style="color:${c}">${up?'↑':'↓'} ${val}</span>`;}
@@ -835,6 +840,16 @@ function renderMgrOps(){
 // При старте показываем welcome screen (данных нет)
 document.getElementById('t-welcome').style.display='';
 document.getElementById('t-dash').style.display='none';
+
+// Инициализируем снапшоты если localStorage пустой
+(function(){
+  const SNAP_KEY = 'fleetos_snaps_v2';
+  const existing = localStorage.getItem(SNAP_KEY);
+  if(!existing || JSON.parse(existing).length === 0){
+    localStorage.setItem(SNAP_KEY, JSON.stringify([{"date":"2026-04-11","debt":-2331487,"rent":-863000,"debtors":123,"online":252,"total":300,"kpd":84,"osago":48,"toExp":3,"insp":167,"ts":1775865600000}]));
+    console.log('Инициализированы начальные снапшоты');
+  }
+})();
 </script>
 </body>
 </html>
