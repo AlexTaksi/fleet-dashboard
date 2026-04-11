@@ -1,38 +1,46 @@
 <!DOCTYPE html>
-<html lang="ru"><head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>FleetOS — territorytaxi</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<title>FleetOS — territorytaxi CRM</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#080b12;color:#dde1ef;min-height:100vh}
-.hdr{background:#0d1117;border-bottom:1px solid #1a1e2d;padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:52px;position:sticky;top:0;z-index:99;gap:12px}
-.logo{display:flex;align-items:center;gap:10px}
+.hdr{background:#0d1117;border-bottom:1px solid #1a1e2d;padding:0 20px;display:flex;align-items:center;justify-content:space-between;height:52px;position:sticky;top:0;z-index:99;gap:10px;flex-wrap:wrap}
+.logo{display:flex;align-items:center;gap:10px;flex-shrink:0}
 .logo-ico{width:30px;height:30px;background:linear-gradient(135deg,#f59e0b,#ef4444);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px}
-.logo-n{font-weight:700;font-size:14px}.logo-s{font-size:11px;color:#555;margin-top:1px}
-.cb{background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.3);color:#fca5a5;padding:4px 12px;border-radius:99px;font-size:12px;font-weight:600;white-space:nowrap}
-.nav{background:#0d1117;border-bottom:1px solid #1a1e2d;display:flex;padding:0 24px;overflow-x:auto}
-.nb{padding:12px 16px;border:none;background:transparent;color:#555;font-size:13px;font-weight:600;cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:.15s}
+.logo-n{font-weight:700;font-size:14px}.logo-s{font-size:11px;color:#555}
+.hdr-r{display:flex;align-items:center;gap:8px}
+.upd-btn{background:rgba(99,102,241,.15);border:1px solid rgba(99,102,241,.4);color:#a5b4fc;padding:5px 12px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap}
+.upd-btn:hover{background:rgba(99,102,241,.25)}
+.cb{background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.3);color:#fca5a5;padding:4px 10px;border-radius:99px;font-size:12px;font-weight:600;white-space:nowrap}
+.nav{background:#0d1117;border-bottom:1px solid #1a1e2d;display:flex;padding:0 20px;overflow-x:auto}
+.nb{padding:11px 14px;border:none;background:transparent;color:#555;font-size:13px;font-weight:600;cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:.15s}
 .nb.on{color:#fff;border-bottom-color:#f59e0b}
-.w{padding:20px 24px;max-width:1500px;margin:0 auto}
-.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
-.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px}
-.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+.w{padding:18px 20px;max-width:1500px;margin:0 auto}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:14px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
 @media(max-width:900px){.g4{grid-template-columns:1fr 1fr}.g3{grid-template-columns:1fr 1fr}.g2{grid-template-columns:1fr}}
 @media(max-width:500px){.g4{grid-template-columns:1fr}.g3{grid-template-columns:1fr}}
-.card{background:#0d1117;border:1px solid #1a1e2d;border-radius:12px;padding:18px}
+.card{background:#0d1117;border:1px solid #1a1e2d;border-radius:12px;padding:16px;margin-bottom:14px}
 .met{background:#111520;border-radius:10px;padding:14px 16px}
-.ml{font-size:11px;color:#555;font-weight:500;text-transform:uppercase;letter-spacing:.05em;margin-bottom:7px}
-.mv{font-size:22px;font-weight:700;line-height:1.1}.ms{font-size:12px;color:#555;margin-top:5px}
-.red{color:#ef4444}.amb{color:#f59e0b}.grn{color:#22c55e}.blu{color:#6366f1}.pur{color:#a78bfa}
+.ml{font-size:11px;color:#555;font-weight:500;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px}
+.mv{font-size:22px;font-weight:700;line-height:1.1}.ms{font-size:12px;color:#555;margin-top:4px}
+.red{color:#ef4444}.amb{color:#f59e0b}.grn{color:#22c55e}.blu{color:#6366f1}
 .st{font-size:11px;font-weight:600;color:#555;text-transform:uppercase;letter-spacing:.05em;margin-bottom:12px}
-.br{display:flex;align-items:center;gap:10px;margin-bottom:10px;font-size:13px}
+.br{display:flex;align-items:center;gap:10px;margin-bottom:9px;font-size:13px}
 .bt{min-width:110px;color:#888}.bk{flex:1;height:5px;background:#1a1e2d;border-radius:3px;overflow:hidden}
-.bf{height:100%;border-radius:3px}.bv{min-width:72px;text-align:right;font-weight:600;font-size:12px}
+.bf{height:100%;border-radius:3px}.bv{min-width:65px;text-align:right;font-weight:600;font-size:12px}
 table{width:100%;border-collapse:collapse}
 th{font-size:11px;color:#555;text-align:left;padding:7px 8px;border-bottom:1px solid #1a1e2d;font-weight:500;white-space:nowrap}
+td{padding:8px;border-bottom:1px solid #0d1117;font-size:13px;vertical-align:middle}
 tr:hover td{background:rgba(255,255,255,.02)}
-.al{border-left:3px solid;padding:12px 16px;border-radius:8px;margin-bottom:8px}
+.badge{font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px}
+.al{border-left:3px solid;padding:11px 14px;border-radius:8px;margin-bottom:8px}
 .al-r{background:rgba(239,68,68,.07);border-left-color:#ef4444}
 .al-a{background:rgba(245,158,11,.06);border-left-color:#f59e0b}
 .al-b{background:rgba(99,102,241,.06);border-left-color:#6366f1}
@@ -40,21 +48,63 @@ tr:hover td{background:rgba(255,255,255,.02)}
 .dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:6px}
 .srch{padding:7px 12px;border:1px solid #1a1e2d;background:#111520;color:#dde1ef;border-radius:8px;font-size:12px;outline:none;width:200px}
 .srch:focus{border-color:#6366f1}
-.fl{display:flex;gap:6px;flex-wrap:wrap;background:#111520;border-radius:9px;padding:3px}
-.fp{padding:6px 12px;border:none;background:transparent;color:#555;font-size:12px;font-weight:600;border-radius:7px;cursor:pointer}
+.fl{display:flex;gap:3px;background:#111520;border-radius:9px;padding:3px;flex-wrap:wrap}
+.fp{padding:5px 11px;border:none;background:transparent;color:#555;font-size:12px;font-weight:600;border-radius:7px;cursor:pointer}
 .fp.on{background:#1a1e2d;color:#fff}
-.status-bar{height:12px;border-radius:6px;overflow:hidden;display:flex;margin-top:12px}
+.sb{height:10px;border-radius:5px;overflow:hidden;display:flex;margin-top:10px}
+.dm-btn{font-size:12px;padding:5px 12px;border-radius:8px;border:1px solid #1a1e2d;background:transparent;color:#555;cursor:pointer;font-weight:600}
+.dm-btn.on{border-color:rgba(99,102,241,.4);background:rgba(99,102,241,.15);color:#a5b4fc}
+.updated{font-size:11px;color:#444;margin-top:8px}
 </style>
 </head>
 <body>
+
+<!-- MODAL -->
+<div id="uploadModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:999;align-items:center;justify-content:center">
+<div style="background:#0d1117;border:1px solid #1a1e2d;border-radius:16px;padding:28px;width:500px;max-width:95vw;max-height:90vh;overflow-y:auto">
+  <div style="font-size:16px;font-weight:700;margin-bottom:6px">📂 Обновить данные из 1С</div>
+  <div style="font-size:13px;color:#666;margin-bottom:20px">Загрузи файлы из 1С:Такси — данные обновятся мгновенно</div>
+  <div id="zone1" style="border:2px dashed #1a1e2d;border-radius:12px;padding:22px;text-align:center;cursor:pointer;position:relative;margin-bottom:8px" ondragover="event.preventDefault();this.style.borderColor='#6366f1'" ondragleave="this.style.borderColor='#1a1e2d'" ondrop="dropFile(event,'drivers','zone1')">
+    <input type="file" accept=".xlsx,.xls,.mxl" style="position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%" onchange="loadFile(this,'drivers','zone1')">
+    <div style="font-size:24px;margin-bottom:8px">👤</div>
+    <div id="zone1-title" style="font-size:14px;font-weight:600;color:#dde1ef;margin-bottom:4px">Список водителей (XLSX / MXL)</div>
+    <div style="font-size:12px;color:#555">Водители → Сохранить в Excel</div>
+  </div>
+  <div id="status1" style="font-size:12px;min-height:18px;margin-bottom:10px;padding-left:4px"></div>
+  <div id="zone2" style="border:2px dashed #1a1e2d;border-radius:12px;padding:22px;text-align:center;cursor:pointer;position:relative;margin-bottom:8px" ondragover="event.preventDefault();this.style.borderColor='#6366f1'" ondragleave="this.style.borderColor='#1a1e2d'" ondrop="dropFile(event,'cars','zone2')">
+    <input type="file" accept=".xlsx,.xls" style="position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%" onchange="loadFile(this,'cars','zone2')">
+    <div style="font-size:24px;margin-bottom:8px">🚗</div>
+    <div id="zone2-title" style="font-size:14px;font-weight:600;color:#dde1ef;margin-bottom:4px">Список автомобилей (XLSX)</div>
+    <div style="font-size:12px;color:#555">Автопарк → Сохранить в Excel</div>
+  </div>
+  <div id="status2" style="font-size:12px;min-height:18px;margin-bottom:10px;padding-left:4px"></div>
+  <div id="zone3" style="border:2px dashed #1a1e2d;border-radius:12px;padding:18px;text-align:center;cursor:pointer;position:relative;margin-bottom:8px" ondragover="event.preventDefault();this.style.borderColor='#6366f1'" ondragleave="this.style.borderColor='#1a1e2d'" ondrop="dropFile(event,'ops','zone3')">
+    <input type="file" accept=".xlsx,.xls" style="position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%" onchange="loadFile(this,'ops','zone3')">
+    <div style="font-size:20px;margin-bottom:5px">📋</div>
+    <div id="zone3-title" style="font-size:13px;font-weight:600;color:#dde1ef;margin-bottom:3px">Операции Яндекс (необязательно)</div>
+    <div style="font-size:11px;color:#555">Яндекс Таксометр → Операции → Сохранить в Excel</div>
+  </div>
+  <div id="status3" style="font-size:12px;min-height:16px;margin-bottom:12px;padding-left:4px"></div>
+  <div style="display:flex;gap:8px;justify-content:flex-end">
+    <button onclick="closeModal()" style="padding:8px 18px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:none;background:#1a1e2d;color:#888">Отмена</button>
+    <button id="applyBtn" onclick="applyData()" disabled style="padding:8px 18px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:none;background:#6366f1;color:#fff;opacity:.4">Применить</button>
+  </div>
+</div>
+</div>
+
+<!-- HEADER -->
 <div class="hdr">
   <div class="logo">
     <div class="logo-ico">🚕</div>
-    <div><div class="logo-n">FleetOS</div><div class="logo-s">territorytaxi · 276 водителей · 300 ТС · 09.04.2026</div></div>
+    <div><div class="logo-n">FleetOS</div><div class="logo-s" id="hdr-sub">territorytaxi</div></div>
   </div>
-  <button onclick="openModal()" style="background:rgba(99,102,241,.15);border:1px solid rgba(99,102,241,.4);color:#a5b4fc;padding:5px 12px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap">📂 Обновить данные</button>
-  <div class="cb">⚡ 12 авто без ОСАГО</div>
+  <div class="hdr-r">
+    <button class="upd-btn" onclick="openModal()">📂 Обновить данные</button>
+    <div class="cb" id="hdr-badge">⚡ нет данных</div>
+  </div>
 </div>
+
+<!-- NAV -->
 <div class="nav">
   <button class="nb on" onclick="show('dash',this)">Сводка</button>
   <button class="nb" onclick="show('fleet',this)">Автопарк</button>
@@ -64,41 +114,36 @@ tr:hover td{background:rgba(255,255,255,.02)}
   <button class="nb" onclick="show('dyn',this)">Динамика</button>
   <button class="nb" onclick="show('mgr',this)">Менеджеры</button>
 </div>
+
 <div class="w">
 
-<!-- ЭКРАН ЗАГРУЗКИ -->
-<div id="t-welcome" style="display:none;text-align:center;padding:60px 20px">
+<!-- WELCOME -->
+<div id="t-welcome" style="text-align:center;padding:60px 20px">
   <div style="font-size:48px;margin-bottom:16px">🚕</div>
-  <div style="font-size:18px;font-weight:700;color:#dde1ef;margin-bottom:8px">Добро пожаловать в FleetOS</div>
+  <div style="font-size:18px;font-weight:700;color:#dde1ef;margin-bottom:8px">FleetOS — territorytaxi</div>
   <div style="font-size:14px;color:#555;margin-bottom:28px">Загрузи данные из 1С:Такси чтобы начать</div>
-  <button onclick="openModal()" style="background:#6366f1;color:#fff;border:none;padding:12px 28px;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer">📂 Загрузить данные</button>
-  <div style="margin-top:20px;font-size:12px;color:#444">
-    Водители → Сохранить в Excel &nbsp;·&nbsp; Автопарк → Сохранить в Excel
-  </div>
+  <button class="upd-btn" onclick="openModal()" style="padding:12px 28px;font-size:14px;border-radius:10px">📂 Загрузить данные</button>
+  <div style="margin-top:16px;font-size:12px;color:#444">Водители → Excel &nbsp;·&nbsp; Автопарк → Excel</div>
 </div>
 
 <!-- СВОДКА -->
-<div id="t-dash">
-  <div class="g4" id="metrics-grid"></div>
-  <div class="g4" id="metrics-grid2"></div>
+<div id="t-dash" style="display:none">
+  <div class="g4" id="metrics-top"></div>
+  <div class="g4" id="metrics-bot"></div>
   <div class="g2" id="seg-fleet-grid"></div>
-  <div class="card" style="margin-top:0" id="crit-card">
+  <div class="card" id="crit-card" style="margin-bottom:0">
     <div class="st">🔴 Критические — сегодня</div>
-    <div style="text-align:center;padding:20px;color:#555;font-size:13px">Загрузи данные через «📂 Обновить данные»</div>
-  </div></div>
+    <div id="crit-body"><div style="color:#555;font-size:13px;text-align:center;padding:16px">Загрузи данные</div></div>
+  </div>
 </div>
 
 <!-- АВТОПАРК -->
 <div id="t-fleet" style="display:none">
-  <div class="g3">
-    <div class="met"><div class="ml">Всего ТС</div><div class="mv">300</div><div class="ms">КПД 85% · 256 на линии</div></div>
-    <div class="met"><div class="ml">Вне линии</div><div class="mv amb">44</div><div class="ms">Ремонт + малярка + мойка + свободна + тотал</div></div>
-    <div class="met"><div class="ml">Требуют внимания</div><div class="mv red">19</div><div class="ms">Просроченные документы</div></div>
-  </div>
+  <div class="g3" id="fleet-metrics"></div>
   <div class="card">
     <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:14px">
-      <div class="st" style="margin:0">Список ТС с приоритетом по срочности</div>
-      <div class="fl" id="flFilter">
+      <div class="st" style="margin:0">Список ТС</div>
+      <div class="fl" id="carFilter">
         <button class="fp on" onclick="filterCars('all',this)">Все</button>
         <button class="fp" onclick="filterCars('crit',this)">🔴 Документы</button>
         <button class="fp" onclick="filterCars('repair',this)">🔧 Ремонт</button>
@@ -106,199 +151,76 @@ tr:hover td{background:rgba(255,255,255,.02)}
         <button class="fp" onclick="filterCars('free',this)">⬜ Свободна</button>
       </div>
     </div>
-    <div style="overflow-x:auto">
-    <table>
+    <div style="overflow-x:auto"><table>
       <thead><tr>
-        <th>Гос. номер</th><th>Статус</th><th>Модель</th><th>Год</th><th>Водитель</th><th>Пробег</th><th>ОСАГО</th><th>Техосмотр</th><th>Осмотр</th>
+        <th>Номер</th><th>Статус</th><th>Модель</th><th>Год</th><th>Водитель</th><th>Пробег</th><th>ОСАГО</th><th>Техосмотр</th><th>Осмотр</th>
       </tr></thead>
       <tbody id="carsBody"></tbody>
-    </table>
-    </div>
+    </table></div>
   </div>
 </div>
 
 <!-- ДОКУМЕНТЫ -->
 <div id="t-docs" style="display:none">
-  <div class="g3">
-    <div class="met"><div class="ml">ОСАГО просрочено</div><div class="mv red">12</div><div class="ms">Ездят без страховки прямо сейчас</div></div>
-    <div class="met"><div class="ml">Техосмотр истёк</div><div class="mv red">7</div><div class="ms">Нарушение ПДД при каждой поездке</div></div>
-    <div class="met"><div class="ml">Истекает &lt;30 дней</div><div class="mv amb">4</div><div class="ms">ОСАГО и ТО — требуют записи</div></div>
-  </div>
   <div class="g2">
-    <div class="card">
-      <div class="st">🔴 ОСАГО — критические</div>
-      
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;padding:10px 0;border-bottom:1px solid #1a1e2d;gap:10px">
-        <div><div style="font-weight:600;font-size:13px;font-family:monospace">К615НР30</div><div style="font-size:12px;color:#777;margin-top:2px">Москвич 3 · нет водителя</div></div>
-        <div style="text-align:right;flex-shrink:0"><div style="font-size:12px;color:#888">12.09.2023</div><div style="margin-top:2px"><span style="color:#ef4444;font-weight:700">Просрочено 939д</span></div></div>
-      </div>
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;padding:10px 0;border-bottom:1px solid #1a1e2d;gap:10px">
-        <div><div style="font-weight:600;font-size:13px;font-family:monospace">М583НР30</div><div style="font-size:12px;color:#777;margin-top:2px">Москвич 3 · Тостаев Бада</div></div>
-        <div style="text-align:right;flex-shrink:0"><div style="font-size:12px;color:#888">12.09.2023</div><div style="margin-top:2px"><span style="color:#ef4444;font-weight:700">Просрочено 939д</span></div></div>
-      </div>
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;padding:10px 0;border-bottom:1px solid #1a1e2d;gap:10px">
-        <div><div style="font-weight:600;font-size:13px;font-family:monospace">К542НР30</div><div style="font-size:12px;color:#777;margin-top:2px">Москвич 3 · Зарипов Ринат</div></div>
-        <div style="text-align:right;flex-shrink:0"><div style="font-size:12px;color:#888">12.09.2023</div><div style="margin-top:2px"><span style="color:#ef4444;font-weight:700">Просрочено 939д</span></div></div>
-      </div>
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;padding:10px 0;border-bottom:1px solid #1a1e2d;gap:10px">
-        <div><div style="font-weight:600;font-size:13px;font-family:monospace">М585НР30</div><div style="font-size:12px;color:#777;margin-top:2px">Москвич 3 · нет водителя</div></div>
-        <div style="text-align:right;flex-shrink:0"><div style="font-size:12px;color:#888">12.09.2023</div><div style="margin-top:2px"><span style="color:#ef4444;font-weight:700">Просрочено 939д</span></div></div>
-      </div>
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;padding:10px 0;border-bottom:1px solid #1a1e2d;gap:10px">
-        <div><div style="font-weight:600;font-size:13px;font-family:monospace">Е919НР30</div><div style="font-size:12px;color:#777;margin-top:2px">Haval F7 · Изетов С.С.</div></div>
-        <div style="text-align:right;flex-shrink:0"><div style="font-size:12px;color:#888">15.11.2024</div><div style="margin-top:2px"><span style="color:#ef4444;font-weight:700">Просрочено 510д</span></div></div>
-      </div>
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;padding:10px 0;border-bottom:1px solid #1a1e2d;gap:10px">
-        <div><div style="font-weight:600;font-size:13px;font-family:monospace">Р919НР30</div><div style="font-size:12px;color:#777;margin-top:2px">Haval Jolion · Синитенков С.В.</div></div>
-        <div style="text-align:right;flex-shrink:0"><div style="font-size:12px;color:#888">02.03.2024</div><div style="margin-top:2px"><span style="color:#ef4444;font-weight:700">Просрочено 402д</span></div></div>
-      </div>
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;padding:10px 0;border-bottom:1px solid #1a1e2d;gap:10px">
-        <div><div style="font-weight:600;font-size:13px;font-family:monospace">В628НР30</div><div style="font-size:12px;color:#777;margin-top:2px">Haval Jolion · Бархатов Р.З.</div></div>
-        <div style="text-align:right;flex-shrink:0"><div style="font-size:12px;color:#888">02.03.2024</div><div style="margin-top:2px"><span style="color:#ef4444;font-weight:700">Просрочено 402д</span></div></div>
-      </div>
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;padding:10px 0;border-bottom:1px solid #1a1e2d;gap:10px">
-        <div><div style="font-weight:600;font-size:13px;font-family:monospace">Е191НР30</div><div style="font-size:12px;color:#777;margin-top:2px">Haval Jolion · Нуралиев Аслан</div></div>
-        <div style="text-align:right;flex-shrink:0"><div style="font-size:12px;color:#888">02.03.2024</div><div style="margin-top:2px"><span style="color:#ef4444;font-weight:700">Просрочено 402д</span></div></div>
-      </div>
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;padding:10px 0;border-bottom:1px solid #1a1e2d;gap:10px">
-        <div><div style="font-weight:600;font-size:13px;font-family:monospace">К596РР30</div><div style="font-size:12px;color:#777;margin-top:2px">LADA Granta · Марупов С.Р.</div></div>
-        <div style="text-align:right;flex-shrink:0"><div style="font-size:12px;color:#888">04.02.2026</div><div style="margin-top:2px"><span style="color:#ef4444;font-weight:700">Просрочено 63д</span></div></div>
-      </div>
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;padding:10px 0;border-bottom:1px solid #1a1e2d;gap:10px">
-        <div><div style="font-weight:600;font-size:13px;font-family:monospace">В942НР30</div><div style="font-size:12px;color:#777;margin-top:2px">LADA Granta · Шитик К.Э.</div></div>
-        <div style="text-align:right;flex-shrink:0"><div style="font-size:12px;color:#888">04.02.2026</div><div style="margin-top:2px"><span style="color:#ef4444;font-weight:700">Просрочено 63д</span></div></div>
-      </div>
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;padding:10px 0;border-bottom:1px solid #1a1e2d;gap:10px">
-        <div><div style="font-weight:600;font-size:13px;font-family:monospace">В131НЕ30</div><div style="font-size:12px;color:#777;margin-top:2px">Chery Tiggo 4 · нет водителя</div></div>
-        <div style="text-align:right;flex-shrink:0"><div style="font-size:12px;color:#888">28.02.2026</div><div style="margin-top:2px"><span style="color:#ef4444;font-weight:700">Просрочено 40д</span></div></div>
-      </div>
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;padding:10px 0;border-bottom:1px solid #1a1e2d;gap:10px">
-        <div><div style="font-weight:600;font-size:13px;font-family:monospace">О759НХ30</div><div style="font-size:12px;color:#777;margin-top:2px">Chery Arrizo 8 · Орлов Р.Г.</div></div>
-        <div style="text-align:right;flex-shrink:0"><div style="font-size:12px;color:#888">04.04.2026</div><div style="margin-top:2px"><span style="color:#ef4444;font-weight:700">Просрочено 5д</span></div></div>
-      </div>
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;padding:10px 0;border-bottom:1px solid #1a1e2d;gap:10px">
-        <div><div style="font-weight:600;font-size:13px;font-family:monospace">О808НХ30</div><div style="font-size:12px;color:#777;margin-top:2px">LADA Granta · Асрабоев А.Ж.</div></div>
-        <div style="text-align:right;flex-shrink:0"><div style="font-size:12px;color:#888">04.05.2026</div><div style="margin-top:2px"><span style="color:#f59e0b;font-weight:600">25 дн.</span></div></div>
-      </div>
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;padding:10px 0;border-bottom:1px solid #1a1e2d;gap:10px">
-        <div><div style="font-weight:600;font-size:13px;font-family:monospace">К942НЕ30</div><div style="font-size:12px;color:#777;margin-top:2px">Chery Tiggo 4 Pro · Бархатов Р.А.</div></div>
-        <div style="text-align:right;flex-shrink:0"><div style="font-size:12px;color:#888">04.06.2026</div><div style="margin-top:2px"><span style="color:#666">56 дн.</span></div></div>
-      </div>
-    </div>
-    <div class="card">
-      <div class="st">🔴 Техосмотр — критические</div>
-      
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;padding:10px 0;border-bottom:1px solid #1a1e2d;gap:10px">
-        <div><div style="font-weight:600;font-size:13px;font-family:monospace">К942НЕ30</div><div style="font-size:12px;color:#777;margin-top:2px">Chery Tiggo 4 Pro · Бархатов Р.А.</div></div>
-        <div style="text-align:right;flex-shrink:0"><div style="font-size:12px;color:#888">07.01.2026</div><div style="margin-top:2px"><span style="color:#ef4444;font-weight:700">Просрочено 92д</span></div></div>
-      </div>
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;padding:10px 0;border-bottom:1px solid #1a1e2d;gap:10px">
-        <div><div style="font-weight:600;font-size:13px;font-family:monospace">А470НР30</div><div style="font-size:12px;color:#777;margin-top:2px">Chery Tiggo 4 Pro · Перепелков А.Ю.</div></div>
-        <div style="text-align:right;flex-shrink:0"><div style="font-size:12px;color:#888">07.01.2026</div><div style="margin-top:2px"><span style="color:#ef4444;font-weight:700">Просрочено 92д</span></div></div>
-      </div>
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;padding:10px 0;border-bottom:1px solid #1a1e2d;gap:10px">
-        <div><div style="font-weight:600;font-size:13px;font-family:monospace">Н936НР30</div><div style="font-size:12px;color:#777;margin-top:2px">Haval Jolion · Панчулидзе З.А.</div></div>
-        <div style="text-align:right;flex-shrink:0"><div style="font-size:12px;color:#888">07.02.2026</div><div style="margin-top:2px"><span style="color:#ef4444;font-weight:700">Просрочено 60д</span></div></div>
-      </div>
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;padding:10px 0;border-bottom:1px solid #1a1e2d;gap:10px">
-        <div><div style="font-weight:600;font-size:13px;font-family:monospace">О143НР30</div><div style="font-size:12px;color:#777;margin-top:2px">Haval Jolion · Табелов С.Н.</div></div>
-        <div style="text-align:right;flex-shrink:0"><div style="font-size:12px;color:#888">09.02.2026</div><div style="margin-top:2px"><span style="color:#ef4444;font-weight:700">Просрочено 58д</span></div></div>
-      </div>
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;padding:10px 0;border-bottom:1px solid #1a1e2d;gap:10px">
-        <div><div style="font-weight:600;font-size:13px;font-family:monospace">Е919НР30</div><div style="font-size:12px;color:#777;margin-top:2px">Haval F7 · Изетов С.С.</div></div>
-        <div style="text-align:right;flex-shrink:0"><div style="font-size:12px;color:#888">12.02.2026</div><div style="margin-top:2px"><span style="color:#ef4444;font-weight:700">Просрочено 55д</span></div></div>
-      </div>
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;padding:10px 0;border-bottom:1px solid #1a1e2d;gap:10px">
-        <div><div style="font-weight:600;font-size:13px;font-family:monospace">К213НЕ30</div><div style="font-size:12px;color:#777;margin-top:2px">Haval F7 · Краевский Э.Ч.</div></div>
-        <div style="text-align:right;flex-shrink:0"><div style="font-size:12px;color:#888">11.03.2026</div><div style="margin-top:2px"><span style="color:#ef4444;font-weight:700">Просрочено 29д</span></div></div>
-      </div>
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;padding:10px 0;border-bottom:1px solid #1a1e2d;gap:10px">
-        <div><div style="font-weight:600;font-size:13px;font-family:monospace">В131НЕ30</div><div style="font-size:12px;color:#777;margin-top:2px">Chery Tiggo 4 · нет водителя</div></div>
-        <div style="text-align:right;flex-shrink:0"><div style="font-size:12px;color:#888">16.03.2026</div><div style="margin-top:2px"><span style="color:#ef4444;font-weight:700">Просрочено 24д</span></div></div>
-      </div>
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;padding:10px 0;border-bottom:1px solid #1a1e2d;gap:10px">
-        <div><div style="font-weight:600;font-size:13px;font-family:monospace">В354РР30</div><div style="font-size:12px;color:#777;margin-top:2px">BELGEE X50 · Марин Ион Иванович</div></div>
-        <div style="text-align:right;flex-shrink:0"><div style="font-size:12px;color:#888">11.04.2026</div><div style="margin-top:2px"><span style="color:#ef4444;font-weight:700">2 дн.!</span></div></div>
-      </div>
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;padding:10px 0;border-bottom:1px solid #1a1e2d;gap:10px">
-        <div><div style="font-weight:600;font-size:13px;font-family:monospace">С426НР30</div><div style="font-size:12px;color:#777;margin-top:2px">Haval Jolion · Белых В.О.</div></div>
-        <div style="text-align:right;flex-shrink:0"><div style="font-size:12px;color:#888">09.05.2026</div><div style="margin-top:2px"><span style="color:#f59e0b;font-weight:600">30 дн.</span></div></div>
-      </div>
-    </div>
+    <div class="card" id="osago-card"><div class="st">🔴 ОСАГО</div><div style="color:#555;font-size:13px">Загрузи данные</div></div>
+    <div class="card" id="to-card"><div class="st">🔴 Техосмотр</div><div style="color:#555;font-size:13px">Загрузи данные</div></div>
   </div>
-  <div class="card">
-    <div class="st">💀 Тотал — 6 авто (страховые случаи / полная гибель)</div>
-    <div style="display:flex;flex-wrap:wrap;gap:10px">
-      <div style="background:#1a1e2d;border-radius:8px;padding:10px 14px;min-width:160px"><div style="font-family:monospace;font-weight:700;color:#dde1ef">А809НЕ30</div><div style="font-size:12px;color:#666;margin-top:3px">Chery Tiggo 4 Pro</div><div style="font-size:11px;color:#ef4444;margin-top:4px;font-weight:600">ТОТАЛ</div></div><div style="background:#1a1e2d;border-radius:8px;padding:10px 14px;min-width:160px"><div style="font-family:monospace;font-weight:700;color:#dde1ef">Х404НО30</div><div style="font-size:12px;color:#666;margin-top:3px">Chery Tiggo 7 Pro Max</div><div style="font-size:11px;color:#ef4444;margin-top:4px;font-weight:600">ТОТАЛ</div></div><div style="background:#1a1e2d;border-radius:8px;padding:10px 14px;min-width:160px"><div style="font-family:monospace;font-weight:700;color:#dde1ef">М664НР30</div><div style="font-size:12px;color:#666;margin-top:3px">Geely Atlas Pro</div><div style="font-size:11px;color:#ef4444;margin-top:4px;font-weight:600">ТОТАЛ</div></div><div style="background:#1a1e2d;border-radius:8px;padding:10px 14px;min-width:160px"><div style="font-family:monospace;font-weight:700;color:#dde1ef">В967НР30</div><div style="font-size:12px;color:#666;margin-top:3px">LADA Granta</div><div style="font-size:11px;color:#ef4444;margin-top:4px;font-weight:600">ТОТАЛ</div></div><div style="background:#1a1e2d;border-radius:8px;padding:10px 14px;min-width:160px"><div style="font-family:monospace;font-weight:700;color:#dde1ef">О782НР30</div><div style="font-size:12px;color:#666;margin-top:3px">LADA Granta</div><div style="font-size:11px;color:#ef4444;margin-top:4px;font-weight:600">ТОТАЛ</div></div><div style="background:#1a1e2d;border-radius:8px;padding:10px 14px;min-width:160px"><div style="font-family:monospace;font-weight:700;color:#dde1ef">Т761НР30</div><div style="font-size:12px;color:#666;margin-top:3px">LADA Granta</div><div style="font-size:11px;color:#ef4444;margin-top:4px;font-weight:600">ТОТАЛ</div></div>
-    </div>
-  </div>
+  <div class="card" id="total-card"><div class="st">💀 Тотал</div><div style="color:#555;font-size:13px">Загрузи данные</div></div>
 </div>
 
 <!-- ДОЛЖНИКИ -->
 <div id="t-debt" style="display:none">
   <div class="card">
     <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:14px">
-      <div><div class="st" style="margin:0">Топ должников — реальные данные 1С</div><div style="font-size:12px;color:#555;margin-top:4px">Суммарный долг: <span style="color:#ef4444;font-weight:600"><span id="debt-summary-inline">загрузи данные</span></div></div>
-      <input class="srch" id="ds" placeholder="Поиск водителя..." oninput="filterDebt()">
+      <div id="debt-title" class="st" style="margin:0">Должники</div>
+      <input class="srch" id="debtSearch" placeholder="Поиск..." oninput="renderDebt()">
     </div>
-    <div style="overflow-x:auto">
-    <table>
-      <thead><tr><th>#</th><th>Водитель</th><th>Итого</th><th>Аренда</th><th>Пени</th><th>Повреждения</th><th>Авто</th><th>Стаж</th><th>Сегмент</th></tr></thead>
+    <div id="debt-summary" style="font-size:12px;color:#555;margin-bottom:10px"></div>
+    <div style="overflow-x:auto"><table>
+      <thead><tr><th>#</th><th>Водитель</th><th>Итого</th><th>Аренда</th><th>Пени</th><th>Повреждения</th><th>Штрафы</th><th>Авто</th><th>Стаж</th><th>Сег.</th></tr></thead>
       <tbody id="debtBody"></tbody>
-    </table>
-    </div>
-    <div style="margin-top:10px;font-size:12px;color:#555;text-align:center">Показаны 24 должников · Данные 1С:Такси · 09.04.2026</div>
+    </table></div>
+    <div class="updated" id="debt-footer"></div>
   </div>
 </div>
 
 <!-- АЛЕРТЫ -->
 <div id="t-alerts" style="display:none">
-  <div class="card" id="alertsCard">
-    <div style="text-align:center;padding:20px;color:#555;font-size:13px">Загрузи данные через «📂 Обновить данные»</div>
-  </div>
+  <div class="card" id="alertsCard"><div style="color:#555;font-size:13px;text-align:center;padding:16px">Загрузи данные</div></div>
 </div>
 
 <!-- ДИНАМИКА -->
 <div id="t-dyn" style="display:none">
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:12px">
+  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px">
     <div>
       <div style="font-size:14px;font-weight:600;color:#dde1ef">Динамика парка</div>
-      <div style="font-size:12px;color:#555;margin-top:2px">Снапшот сохраняется каждый раз при нажатии «Применить». До 90 дней истории.</div>
+      <div style="font-size:12px;color:#555;margin-top:2px">Снапшот сохраняется при каждом «Применить» · до 90 дней истории</div>
     </div>
     <div style="display:flex;gap:6px;flex-wrap:wrap">
-      <button onclick="setDynMetric('debt',this)" class="dm-btn" style="font-size:12px;padding:5px 12px;border-radius:8px;border:1px solid rgba(99,102,241,.4);background:rgba(99,102,241,.15);color:#a5b4fc;cursor:pointer;font-weight:600">Дебиторка</button>
-      <button onclick="setDynMetric('debtors',this)" class="dm-btn" style="font-size:12px;padding:5px 12px;border-radius:8px;border:1px solid #1a1e2d;background:transparent;color:#555;cursor:pointer">Должников</button>
-      <button onclick="setDynMetric('kpd',this)" class="dm-btn" style="font-size:12px;padding:5px 12px;border-radius:8px;border:1px solid #1a1e2d;background:transparent;color:#555;cursor:pointer">КПД %</button>
-      <button onclick="setDynMetric('osago',this)" class="dm-btn" style="font-size:12px;padding:5px 12px;border-radius:8px;border:1px solid #1a1e2d;background:transparent;color:#555;cursor:pointer">ОСАГО</button>
+      <button class="dm-btn on" onclick="setDynMetric('debt',this)">Дебиторка</button>
+      <button class="dm-btn" onclick="setDynMetric('debtors',this)">Должников</button>
+      <button class="dm-btn" onclick="setDynMetric('kpd',this)">КПД %</button>
+      <button class="dm-btn" onclick="setDynMetric('osago',this)">ОСАГО</button>
     </div>
   </div>
-
-  <div id="dyn-cards" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px"></div>
-
-  <div class="card" style="margin-bottom:14px">
+  <div class="g4" id="dyn-cards"></div>
+  <div class="card">
     <div style="position:relative;width:100%;height:260px">
-      <canvas id="dynChart" role="img" aria-label="График динамики показателей таксопарка"></canvas>
+      <canvas id="dynChart" role="img" aria-label="График динамики"></canvas>
     </div>
-    <div id="dyn-legend" style="margin-top:10px;font-size:12px;color:#555"></div>
+    <div id="dyn-legend" style="margin-top:8px;font-size:12px;color:#555"></div>
   </div>
-
   <div class="card" id="dyn-empty" style="display:none;text-align:center;padding:32px">
     <div style="font-size:28px;margin-bottom:10px">📊</div>
-    <div style="font-size:14px;font-weight:600;color:#dde1ef;margin-bottom:6px">Пока нет данных для графика</div>
-    <div style="font-size:13px;color:#555">Загрузи файлы через «Обновить данные» → «Применить»<br>Первый снапшот сохранится автоматически</div>
+    <div style="font-size:14px;font-weight:600;margin-bottom:6px">Нет данных для графика</div>
+    <div style="font-size:13px;color:#555">Загрузи файлы → Применить — первый снапшот сохранится</div>
   </div>
-
   <div class="card">
-    <div class="st">История снапшотов</div>
-    <div style="overflow-x:auto"><table id="dyn-table" style="width:100%;border-collapse:collapse">
+    <div class="st">История</div>
+    <div style="overflow-x:auto"><table>
       <thead><tr>
-        <th style="font-size:11px;color:#555;text-align:left;padding:6px 8px;border-bottom:1px solid #1a1e2d;font-weight:500">Дата</th>
-        <th style="font-size:11px;color:#555;text-align:right;padding:6px 8px;border-bottom:1px solid #1a1e2d;font-weight:500">Дебиторка</th>
-        <th style="font-size:11px;color:#555;text-align:right;padding:6px 8px;border-bottom:1px solid #1a1e2d;font-weight:500">Должников</th>
-        <th style="font-size:11px;color:#555;text-align:right;padding:6px 8px;border-bottom:1px solid #1a1e2d;font-weight:500">КПД</th>
-        <th style="font-size:11px;color:#555;text-align:right;padding:6px 8px;border-bottom:1px solid #1a1e2d;font-weight:500">На линии</th>
-        <th style="font-size:11px;color:#555;text-align:right;padding:6px 8px;border-bottom:1px solid #1a1e2d;font-weight:500">ОСАГО !</th>
-        <th style="font-size:11px;color:#555;text-align:right;padding:6px 8px;border-bottom:1px solid #1a1e2d;font-weight:500">Без осмотра</th>
+        <th>Дата</th><th style="text-align:right">Дебиторка</th><th style="text-align:right">Должников</th><th style="text-align:right">КПД</th><th style="text-align:right">На линии</th><th style="text-align:right">ОСАГО!</th><th style="text-align:right">Без осмотра</th>
       </tr></thead>
       <tbody id="dyn-tbody"></tbody>
     </table></div>
@@ -307,74 +229,122 @@ tr:hover td{background:rgba(255,255,255,.02)}
 
 <!-- МЕНЕДЖЕРЫ -->
 <div id="t-mgr" style="display:none">
-  <div id="mgr-empty" class="card" style="text-align:center;padding:32px">
+  <div class="card" id="mgr-empty" style="text-align:center;padding:32px">
     <div style="font-size:28px;margin-bottom:10px">👥</div>
-    <div style="font-size:14px;font-weight:600;color:#dde1ef;margin-bottom:6px">Загрузи файл операций</div>
-    <div style="font-size:13px;color:#555">Нажми «📂 Обновить данные» → загрузи файл «Операции Яндекс Таксометр»<br>Появится статистика по каждому менеджеру</div>
+    <div style="font-size:14px;font-weight:600;margin-bottom:6px">Загрузи файл операций</div>
+    <div style="font-size:13px;color:#555">«Обновить данные» → третья зона → Операции Яндекс Таксометр</div>
   </div>
-
   <div id="mgr-content" style="display:none">
-    <div id="mgr-cards" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin-bottom:16px"></div>
-
-    <div class="g2" style="margin-bottom:14px">
+    <div class="g4" id="mgr-cards"></div>
+    <div class="g2">
       <div class="card">
-        <div class="st">Наличные и переводы — сегодня</div>
+        <div class="st">Наличные и переводы</div>
         <div id="mgr-cash"></div>
       </div>
       <div class="card">
         <div class="st">Активность по часам</div>
-        <div style="position:relative;height:120px"><canvas id="mgrHourChart" role="img" aria-label="Активность менеджеров по часам"></canvas></div>
+        <div style="position:relative;height:120px"><canvas id="mgrHourChart" role="img" aria-label="Активность по часам"></canvas></div>
       </div>
     </div>
-
     <div class="card">
       <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:14px">
-        <div class="st" style="margin:0">Лента операций менеджеров</div>
-        <div style="display:flex;gap:6px;flex-wrap:wrap" id="mgr-filter-btns">
-          <button onclick="filterMgrOps('all',this)" class="fp on">Все</button>
-          <button onclick="filterMgrOps('cash',this)" class="fp">💵 Наличные</button>
-          <button onclick="filterMgrOps('correction',this)" class="fp">✏️ Корректировки</button>
-          <button onclick="filterMgrOps('penalty',this)" class="fp">⚠️ Штрафы/Пени</button>
+        <div class="st" style="margin:0">Лента операций</div>
+        <div class="fl" id="mgr-filter-btns">
+          <button class="fp on" onclick="filterMgrOps('all',this)">Все</button>
+          <button class="fp" onclick="filterMgrOps('cash',this)">💵 Наличные</button>
+          <button class="fp" onclick="filterMgrOps('correction',this)">✏️ Корректировки</button>
+          <button class="fp" onclick="filterMgrOps('penalty',this)">⚠️ Штрафы/Пени</button>
         </div>
       </div>
       <div style="overflow-x:auto"><table>
-        <thead><tr>
-          <th>Время</th><th>Менеджер</th><th>Водитель</th><th>Операция</th><th>Приход</th><th>Расход</th><th>Способ</th><th>Комментарий</th>
-        </tr></thead>
+        <thead><tr><th>Время</th><th>Менеджер</th><th>Водитель</th><th>Операция</th><th>Приход</th><th>Расход</th><th>Способ</th><th>Комментарий</th></tr></thead>
         <tbody id="mgr-ops-body"></tbody>
       </table></div>
     </div>
   </div>
 </div>
-</div>
+
+</div><!-- end .w -->
 
 <script>
-let _pendingDrivers = null, _pendingCars = null;
+// ═══════════════════════════════════
+// ДАННЫЕ
+// ═══════════════════════════════════
+let DRIVERS = [];
+let CARS = [];
+let OPS = [];
+let UPDATED = '';
+let _pendingDrivers = null;
+let _pendingCars = null;
+let _pendingOps = null;
 
-function openModal(){
-  _pendingDrivers=null; _pendingCars=null;
-  document.getElementById('zone1').style.borderColor='#1a1e2d';
-  document.getElementById('zone1-title').textContent='Список водителей (MXL или XLSX)';
-  document.getElementById('zone1-title').style.color='#dde1ef';
-  document.getElementById('zone2').style.borderColor='#1a1e2d';
-  document.getElementById('zone2-title').textContent='Список автомобилей (XLSX)';
-  document.getElementById('zone2-title').style.color='#dde1ef';
-  document.getElementById('status1').textContent='';
-  document.getElementById('status2').textContent='';
-  document.getElementById('applyBtn').disabled=true;
-  document.getElementById('applyBtn').style.opacity='.4';
-  const m=document.getElementById('uploadModal');
-  m.style.display='flex';
+// ═══════════════════════════════════
+// ХЕЛПЕРЫ
+// ═══════════════════════════════════
+const SEG = {ballast:{l:'Балласт',c:'#ef4444'},potential:{l:'Потенциал',c:'#6366f1'},stable:{l:'Стабильный',c:'#22c55e'},star:{l:'Звезда',c:'#f59e0b'}};
+const ST = {online:{l:'На линии',c:'#22c55e'},repair:{l:'Ремонт',c:'#ef4444'},paint:{l:'Малярка',c:'#f59e0b'},free:{l:'Свободна',c:'#6366f1'},total:{l:'Тотал',c:'#dc2626'},wash:{l:'Мойка',c:'#0ea5e9'},other:{l:'Иное',c:'#888'}};
+function fmt(n){const a=Math.abs(n);if(a>=1000000)return(n/1000000).toFixed(1)+'М ₽';if(a>=1000)return Math.round(n/1000)+'К ₽';return Math.round(n).toLocaleString('ru-RU')+' ₽';}
+function ff(n){return(n<0?'-':'')+Math.abs(Math.round(n)).toLocaleString('ru-RU')+' ₽';}
+function segB(s){const sg=SEG[s]||{l:s,c:'#888'};return`<span class="badge" style="background:${sg.c}22;color:${sg.c}">${sg.l}</span>`;}
+function stB(s){const st=ST[s]||ST.other;return`<span class="badge" style="background:${st.c}22;color:${st.c}">${st.l}</span>`;}
+function dl(d){if(d>9000)return'—';if(d<0)return`<span style="color:#ef4444;font-weight:700">Просрочено ${Math.abs(d)}д</span>`;if(d<=7)return`<span style="color:#ef4444;font-weight:700">${d}д!</span>`;if(d<=30)return`<span style="color:#f59e0b;font-weight:600">${d}д</span>`;return`<span style="color:#555">${d}д</span>`;}
+
+// ═══════════════════════════════════
+// НАВИГАЦИЯ
+// ═══════════════════════════════════
+function show(id, btn){
+  ['welcome','dash','fleet','docs','debt','alerts','dyn','mgr'].forEach(t=>{
+    const el=document.getElementById('t-'+t);
+    if(el) el.style.display='none';
+  });
+  if(!DRIVERS.length && !CARS.length && id!=='dyn' && id!=='mgr'){
+    document.getElementById('t-welcome').style.display='';
+  } else {
+    const el=document.getElementById('t-'+id);
+    if(el) el.style.display='';
+  }
+  document.querySelectorAll('.nb').forEach(b=>b.classList.remove('on'));
+  if(btn) btn.classList.add('on');
+  if(id==='dyn') renderDyn();
+  if(id==='mgr') renderManagers();
+  if(id==='debt') renderDebt();
 }
-function closeModal(){ document.getElementById('uploadModal').style.display='none'; }
-document.getElementById('uploadModal').addEventListener('click',function(e){if(e.target===this)closeModal();});
+
+// ═══════════════════════════════════
+// МОДАЛЬНОЕ ОКНО ЗАГРУЗКИ
+// ═══════════════════════════════════
+function openModal(){
+  _pendingDrivers=null; _pendingCars=null; _pendingOps=null;
+  ['zone1','zone2','zone3'].forEach(z=>{
+    const el=document.getElementById(z);
+    if(el) el.style.borderColor='#1a1e2d';
+  });
+  ['zone1-title','zone2-title','zone3-title'].forEach((id,i)=>{
+    const el=document.getElementById(id);
+    if(el){ el.style.color='#dde1ef'; el.textContent=['Список водителей (XLSX / MXL)','Список автомобилей (XLSX)','Операции Яндекс (необязательно)'][i]; }
+  });
+  ['status1','status2','status3'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) el.textContent='';
+  });
+  const btn=document.getElementById('applyBtn');
+  if(btn){ btn.disabled=true; btn.style.opacity='.4'; }
+  const m=document.getElementById('uploadModal');
+  if(m) m.style.display='flex';
+}
+function closeModal(){
+  const m=document.getElementById('uploadModal');
+  if(m) m.style.display='none';
+}
+document.getElementById('uploadModal').addEventListener('click',function(e){ if(e.target===this) closeModal(); });
 
 function dropFile(e,type,zoneId){ e.preventDefault(); document.getElementById(zoneId).style.borderColor='#1a1e2d'; const f=e.dataTransfer.files[0]; if(f) processFile(f,type,zoneId); }
 function loadFile(input,type,zoneId){ if(input.files[0]) processFile(input.files[0],type,zoneId); }
 
 function processFile(file,type,zoneId){
-  const st=document.getElementById(zoneId==='zone1'?'status1':'status2');
+  const st=document.getElementById(zoneId==='zone1'?'status1':zoneId==='zone2'?'status2':'status3');
   const ti=document.getElementById(zoneId+'-title');
+  const zone=document.getElementById(zoneId);
   st.style.color='#f59e0b'; st.textContent='⏳ Читаем файл...';
   const reader=new FileReader();
   reader.onload=function(e){
@@ -382,46 +352,47 @@ function processFile(file,type,zoneId){
       const wb=XLSX.read(e.target.result,{type:'array',cellDates:true});
       const ws=wb.Sheets[wb.SheetNames[0]];
       const rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
-      if(type==='ops'){
-        const parsed=_parseOps(rows);
-        if(parsed.length>0){
-          window._pendingOps=parsed;
-          document.getElementById(zoneId).style.borderColor='#22c55e';
-          ti.style.color='#22c55e'; ti.textContent='✓ '+file.name+' ('+parsed.length+' оп. менеджеров)';
-          st.style.color='#22c55e'; st.textContent='✅ Найдено '+parsed.length+' операций менеджеров';
-          const ok=!!(_pendingDrivers||_pendingCars||window._pendingOps);
-          document.getElementById('applyBtn').disabled=!ok;
-          document.getElementById('applyBtn').style.opacity=ok?'1':'.4';
-        } else { st.style.color='#ef4444'; st.textContent='❌ Операции менеджеров не найдены'; }
-        return;
-      }
-      if(type==='drivers'){
-        const parsed=_parseDrivers(rows);
-        if(parsed.length>0){
-          _pendingDrivers=parsed;
-          document.getElementById(zoneId).style.borderColor='#22c55e';
-          ti.style.color='#22c55e'; ti.textContent='✓ '+file.name+' ('+parsed.length+' водителей)';
-          st.style.color='#22c55e'; st.textContent='✅ Найдено '+parsed.length+' водителей';
-        } else { st.style.color='#ef4444'; st.textContent='❌ Не удалось распознать — проверь формат файла'; }
+      let parsed=[], count=0, label='';
+      if(type==='drivers'){ parsed=parseDrivers(rows); count=parsed.length; label='водителей'; }
+      else if(type==='cars'){ parsed=parseCars(rows); count=parsed.length; label='авто'; }
+      else if(type==='ops'){ parsed=parseOps(rows); count=parsed.length; label='операций менеджеров'; }
+      if(count>0){
+        if(type==='drivers') _pendingDrivers=parsed;
+        else if(type==='cars') _pendingCars=parsed;
+        else _pendingOps=parsed;
+        zone.style.borderColor='#22c55e';
+        ti.style.color='#22c55e'; ti.textContent=`✓ ${file.name} (${count} ${label})`;
+        st.style.color='#22c55e'; st.textContent=`✅ Найдено ${count} ${label}`;
       } else {
-        const parsed=_parseCars(rows);
-        if(parsed.length>0){
-          _pendingCars=parsed;
-          document.getElementById(zoneId).style.borderColor='#22c55e';
-          ti.style.color='#22c55e'; ti.textContent='✓ '+file.name+' ('+parsed.length+' авто)';
-          st.style.color='#22c55e'; st.textContent='✅ Найдено '+parsed.length+' автомобилей';
-        } else { st.style.color='#ef4444'; st.textContent='❌ Не удалось распознать — проверь формат файла'; }
+        st.style.color='#ef4444'; st.textContent='❌ Не удалось распознать файл';
       }
-      const ok=!!(_pendingDrivers||_pendingCars);
-      document.getElementById('applyBtn').disabled=!ok;
-      document.getElementById('applyBtn').style.opacity=ok?'1':'.4';
-    }catch(err){ st.style.color='#ef4444'; st.textContent='❌ Ошибка: '+err.message; }
+      const ok=!!(_pendingDrivers||_pendingCars||_pendingOps);
+      const btn=document.getElementById('applyBtn');
+      btn.disabled=!ok; btn.style.opacity=ok?'1':'.4';
+    } catch(err){ st.style.color='#ef4444'; st.textContent='❌ Ошибка: '+err.message; }
   };
   reader.readAsArrayBuffer(file);
 }
 
-function _parseDrivers(rows){
-  // Ищем строку с заголовками
+function applyData(){
+  const now=new Date().toLocaleDateString('ru-RU')+' '+new Date().toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});
+  if(_pendingDrivers) DRIVERS=_pendingDrivers;
+  if(_pendingCars) CARS=_pendingCars;
+  if(_pendingOps) OPS=_pendingOps;
+  UPDATED=now+' (из файла)';
+  closeModal();
+  saveSnap();
+  refreshAll();
+  // Переходим на сводку
+  document.getElementById('t-welcome').style.display='none';
+  document.getElementById('t-dash').style.display='';
+  document.querySelectorAll('.nb').forEach((b,i)=>b.classList.toggle('on',i===0));
+}
+
+// ═══════════════════════════════════
+// ПАРСЕРЫ
+// ═══════════════════════════════════
+function parseDrivers(rows){
   let hi=-1,nc=-1,pc=-1,tc=-1,tc2=-1,rc=-1,pec=-1,fc=-1,dc=-1,tenc=-1,insc=-1,mc=-1,cc=-1,sc=-1;
   for(let i=0;i<Math.min(rows.length,5);i++){
     const r=rows[i];
@@ -429,7 +400,7 @@ function _parseDrivers(rows){
       const v=String(r[j]||'').trim();
       if(v==='Наименование'||v==='ФИО'){hi=i;nc=j;}
       if(v==='Телефон'&&pc<0)pc=j;
-      if(v==='Итого'){if(tc<0)tc=j;else tc2=j;} // берём второй Итого
+      if(v==='Итого'){if(tc<0)tc=j;else tc2=j;}
       if(v==='Долг аренда')rc=j;
       if(v==='Пени')pec=j;
       if(v==='Долг по штрафам')fc=j;
@@ -443,17 +414,9 @@ function _parseDrivers(rows){
     if(nc>=0)break;
   }
   if(nc<0)return[];
-  // Если есть второй Итого — используем его (баланс без агрегаторов)
-  const totalCol = tc2>=0 ? tc2 : tc;
-  const pn=v=>{
-    try{
-      const s=String(v||'').trim();
-      if(s===''||s==='nan'||s==='---')return 0;
-      return Math.round(parseFloat(s.replace(/[\s\u00a0]/g,'').replace(',','.')));
-    }catch{return 0;}
-  };
+  const totalCol=tc2>=0?tc2:tc;
+  const pn=v=>{try{const s=String(v||'').trim();if(s===''||s==='nan'||s==='---')return 0;return Math.round(parseFloat(s.replace(/[\s\u00a0]/g,'').replace(',','.')));}catch{return 0;}};
   const res=[];
-  // Данные начинаются через строку после заголовков (строка hi+1 обычно пустая)
   for(let i=hi+1;i<rows.length;i++){
     const r=rows[i];
     const name=String(r[nc]||'').trim();
@@ -461,23 +424,13 @@ function _parseDrivers(rows){
     const t=pn(r[totalCol]),ten=parseInt(r[tenc])||0;
     let seg='stable';
     if(t<-50000)seg='ballast';else if(t<-10000)seg='potential';else if(ten<30)seg='potential';else if(t>0)seg='star';
-    res.push({
-      n:name,ph:String(r[pc]||'').trim(),
-      c:String(r[cc]||'').split(' - ')[0].trim(),
-      m:String(r[mc]||'').trim(),
-      t,r:pn(r[rc]),pe:pn(r[pec]),f:pn(r[fc]),d:pn(r[dc]),
-      ten,ins:parseInt(r[insc])||0,seg,stat:String(r[sc]||'').trim()
-    });
+    res.push({n:name,ph:String(r[pc]||'').trim(),c:String(r[cc]||'').split(' - ')[0].trim(),m:String(r[mc]||'').trim().replace('nan',''),y:String(r[mc+2]||'').replace('.0','').trim().replace('nan',''),t,r:pn(r[rc]),pe:pn(r[pec]),f:pn(r[fc]),d:pn(r[dc]),ten,ins:parseInt(r[insc])||0,seg,stat:String(r[sc]||'').trim()});
   }
   return res;
 }
 
-function _parseCars(rows){
-  // Двухуровневые заголовки: row 0 = группа, row 1 = подзаголовок
-  // Фиксированные индексы для стандартного экспорта 1С:Такси
-  let hi=-1,pl=-1,dr=-1,st=-1,mo=-1,yr=-1,km=-1,ins=-1,os=-1,to=-1;
-  
-  // Ищем строку с "Гос номер"
+function parseCars(rows){
+  let hi=-1,pl=-1,dr=-1,st=-1,mo=-1,yr=-1,km=-1,ins=-1;
   for(let i=0;i<Math.min(rows.length,5);i++){
     const r=rows[i];
     for(let j=0;j<r.length;j++){
@@ -493,76 +446,83 @@ function _parseCars(rows){
     if(pl>=0)break;
   }
   if(pl<0)return[];
-  
-  // Ищем ОСАГО и ТО в подзаголовках (следующая строка после hi)
+  // Ищем ОСАГО и ТО в подзаголовках
+  let os=-1,to=-1;
   if(hi>=0&&hi+1<rows.length){
-    const subRow=rows[hi+1];
-    let lastGroup='';
-    const groupRow=rows[hi];
-    for(let j=0;j<subRow.length;j++){
-      const g=String(groupRow[j]||'').trim();
-      const s=String(subRow[j]||'').trim();
-      if(g)lastGroup=g;
-      // ОСАГО "Действителен до"
-      if((lastGroup==='ОСАГО'||g==='ОСАГО')&&s.includes('Действителен до')&&os<0)os=j;
-      // Техосмотр "Действителен до"  
-      if((lastGroup==='Техосмотр'||g==='Техосмотр')&&s.includes('Действителен до')&&to<0)to=j;
+    const sub=rows[hi+1],grp=rows[hi];
+    let lastG='';
+    for(let j=0;j<sub.length;j++){
+      const g=String(grp[j]||'').trim();
+      const s=String(sub[j]||'').trim();
+      if(g)lastG=g;
+      if((lastG==='ОСАГО'||g==='ОСАГО')&&s.includes('Действителен до')&&os<0)os=j;
+      if((lastG==='Техосмотр'||g==='Техосмотр')&&s.includes('Действителен до')&&to<0)to=j;
     }
   }
-  
-  const today=new Date(2026,3,9);
+  const today=new Date(2026,3,11);
   const SM={'На линии':'online','Тех. ремонт (Сервис)':'repair','Свободна':'free','Малярка':'paint','Тотал':'total','Мойка':'wash'};
-  
-  function pd(v){
-    if(!v)return null;
-    const s=String(v).trim();
-    if(s===''||s==='nan'||s==='---')return null;
-    if(v instanceof Date)return v;
-    const m=s.match(/(\d{2})\.(\d{2})\.(\d{4})/);
-    if(m)return new Date(parseInt(m[3]),parseInt(m[2])-1,parseInt(m[1]));
-    return null;
-  }
+  function pd(v){if(!v)return null;const s=String(v).trim();if(s===''||s==='nan'||s==='---')return null;if(v instanceof Date)return v;const m=s.match(/(\d{2})\.(\d{2})\.(\d{4})/);if(m)return new Date(+m[3],+m[2]-1,+m[1]);return null;}
   function dt(d){if(!d)return 9999;return Math.round((d-today)/86400000);}
-  function si(v){try{const s=String(v||'').trim();if(s===''||s==='nan'||s==='---')return 0;return parseInt(parseFloat(s))||0;}catch{return 0;}}
-  
-  // Данные начинаются через 2 строки после первой строки заголовков (hi+1 — подзаголовки, hi+2 — данные)
-  const dataStart = (hi+1<rows.length && rows[hi+1].some(v=>String(v||'').trim()!==''&&!String(v||'').includes('до'))) ? hi+1 : hi+2;
-  
+  function si(v){try{const s=String(v||'').trim();return s===''||s==='nan'||s==='---'?0:parseInt(parseFloat(s))||0;}catch{return 0;}}
+  const dataStart=hi+2;
   const res=[];
   for(let i=dataStart;i<rows.length;i++){
     const r=rows[i];
     const plate=String(r[pl]||'').trim();
     if(!plate||plate==='nan')continue;
-    const od=pd(os>=0?r[os]:null);
-    const td=pd(to>=0?r[to]:null);
+    const od=pd(os>=0?r[os]:null),td=pd(to>=0?r[to]:null);
     const stRaw=String(r[st]||'').trim();
-    res.push({
-      p:plate,
-      d:String(r[dr]||'').trim().replace('nan',''),
-      st:SM[stRaw]||'other',stl:stRaw,
-      m:String(r[mo]||'').trim().replace('nan',''),
-      y:String(r[yr]||'').replace('.0','').trim().replace('nan',''),
-      km:si(r[km]),ins:si(r[ins]),
-      osago:od?od.toLocaleDateString('ru-RU'):'',od:dt(od),
-      to:td?td.toLocaleDateString('ru-RU'):'',td:dt(td)
-    });
+    res.push({p:plate,d:String(r[dr]||'').trim().replace('nan',''),st:SM[stRaw]||'other',stl:stRaw,m:String(r[mo]||'').trim().replace('nan',''),y:String(r[yr]||'').replace('.0','').trim().replace('nan',''),km:si(r[km]),ins:si(r[ins]),osago:od?od.toLocaleDateString('ru-RU'):'',od:dt(od),to:td?td.toLocaleDateString('ru-RU'):'',td:dt(td)});
   }
   return res;
 }
 
-function applyData(){
-  const now=new Date().toLocaleDateString('ru-RU')+' '+new Date().toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});
-  if(_pendingDrivers){ DRIVERS=_pendingDrivers; }
-  if(_pendingCars){ CARS=_pendingCars; }
-  if(window._pendingOps){ OPS=window._pendingOps; }
-  UPDATED=now+' (загружено из файла)';
-  closeModal();
-  _saveSnap();
-  _refreshAll();
+function parseOps(rows){
+  let hi=-1;const cols={};
+  for(let i=0;i<Math.min(rows.length,5);i++){
+    const r=rows[i];
+    for(let j=0;j<r.length;j++){
+      const v=String(r[j]||'').trim();
+      if(v==='Дата операции'){hi=i;cols.date=j;}
+      if(v==='Время операции')cols.time=j;
+      if(v==='Водитель')cols.driver=j;
+      if(v==='Приход')cols.income=j;
+      if(v==='Расход')cols.expense=j;
+      if(v==='Группа')cols.group=j;
+      if(v==='Описание')cols.desc=j;
+      if(v==='Пользователь')cols.user=j;
+      if(v==='Способ оплаты')cols.pay=j;
+    }
+    if(hi>=0)break;
+  }
+  if(hi<0)return[];
+  const res=[];
+  for(let i=hi+1;i<rows.length;i++){
+    const r=rows[i];
+    const user=String(r[cols.user]||'').trim();
+    if(!user||user==='nan')continue;
+    const driver=String(r[cols.driver]||'').trim();
+    if(!driver||driver==='nan')continue;
+    const income=parseFloat(String(r[cols.income]||0).replace(',','.'))||0;
+    const expense=parseFloat(String(r[cols.expense]||0).replace(',','.'))||0;
+    const pay=String(r[cols.pay]||'').trim();
+    const group=String(r[cols.group]||'').trim();
+    const desc=String(r[cols.desc]||'').trim().replace('nan','');
+    let opType='other';
+    if(pay==='Наличные'||pay==='Карта алексей')opType='cash';
+    else if(group.includes('Коррекц')||desc.includes('Сторно'))opType='correction';
+    else if(group.includes('Пени')||group.includes('Штраф')||group.includes('ДТП'))opType='penalty';
+    res.push({date:String(r[cols.date]||'').trim(),time:String(r[cols.time]||'').trim(),driver,income,expense,group,desc,user,pay,opType});
+  }
+  return res;
 }
 
-function _refreshAll(){
-  const D=DRIVERS, C=CARS;
+// ═══════════════════════════════════
+// РЕНДЕР ДАННЫХ
+// ═══════════════════════════════════
+function refreshAll(){
+  const D=DRIVERS,C=CARS;
+  if(!D.length&&!C.length)return;
   const totalDebt=D.reduce((s,d)=>s+(d.t<0?d.t:0),0);
   const rentDebt=D.reduce((s,d)=>s+(d.r<0?d.r:0),0);
   const penDebt=D.reduce((s,d)=>s+(d.pe<0?d.pe:0),0);
@@ -573,464 +533,298 @@ function _refreshAll(){
   const inspOvr=D.filter(d=>d.ins>30).length;
   const segs={ballast:0,potential:0,stable:0,star:0};
   D.forEach(d=>{if(segs[d.seg]!==undefined)segs[d.seg]++;});
-  const kpd=Math.round(online/C.length*100);
-  
-  function fmt(n){if(Math.abs(n)>=1000000)return(n/1000000).toFixed(1)+'М ₽';if(Math.abs(n)>=1000)return Math.round(n/1000)+'К ₽';return Math.round(n).toLocaleString('ru-RU')+' ₽';}
-  function ff(n){return(n<0?'-':'')+Math.abs(Math.round(n)).toLocaleString('ru-RU')+' ₽';}
-  function dl(d){if(d>9000)return'—';if(d<0)return'<span style="color:#ef4444;font-weight:700">Просрочено '+Math.abs(d)+'д</span>';if(d<=7)return'<span style="color:#ef4444;font-weight:700">'+d+'д!</span>';if(d<=30)return'<span style="color:#f59e0b;font-weight:600">'+d+'д</span>';return'<span style="color:#555">'+d+'д</span>';}
-  const SEG={ballast:{l:'Балласт',c:'#ef4444'},potential:{l:'Потенциал',c:'#6366f1'},stable:{l:'Стабильный',c:'#22c55e'},star:{l:'Звезда',c:'#f59e0b'}};
-  const ST={online:{l:'На линии',c:'#22c55e'},repair:{l:'Ремонт',c:'#ef4444'},paint:{l:'Малярка',c:'#f59e0b'},free:{l:'Свободна',c:'#6366f1'},total:{l:'Тотал',c:'#dc2626'},wash:{l:'Мойка',c:'#0ea5e9'},other:{l:'Иное',c:'#888'}};
-  function segB(s){const sg=SEG[s]||{l:s,c:'#888'};return'<span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px;background:'+sg.c+'22;color:'+sg.c+'">'+sg.l+'</span>';}
-  function stB(s){const st=ST[s]||ST.other;return'<span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px;background:'+st.c+'22;color:'+st.c+'">'+st.l+'</span>';}
-  
-  // Хедер
-  document.querySelector('.logo-s').textContent='territorytaxi · '+D.length+' водителей · '+C.length+' ТС · '+UPDATED.split(' ')[0];
-  const cb=document.querySelector('.cb');
-  if(cb)cb.textContent='⚡ '+(osagoExp+toExp>0?(osagoExp+toExp)+' проблем с доками':debtors.length+' должников');
+  const kpd=C.length?Math.round(online/C.length*100):0;
 
-  // Метрики сводки
-  const m=document.querySelector('.g4');
-  if(m)m.innerHTML=[
+  // Хедер
+  document.getElementById('hdr-sub').textContent=`territorytaxi · ${D.length} водителей · ${C.length} ТС · ${UPDATED.split(' ')[0]}`;
+  document.getElementById('hdr-badge').textContent=`⚡ ${osagoExp} без ОСАГО · ${debtors.length} должников`;
+
+  // Метрики сводки ряд 1
+  document.getElementById('metrics-top').innerHTML=[
     {l:'Суммарный долг',v:fmt(Math.abs(totalDebt)),s:debtors.length+' водителей в минусе',c:'red'},
-    {l:'КПД парка',v:kpd+'%',s:online+' из '+C.length+' авто на линии',c:'grn'},
+    {l:'КПД парка',v:kpd+'%',s:`${online} из ${C.length} авто на линии`,c:'grn'},
     {l:'ОСАГО просрочено',v:osagoExp+'',s:'Ездят без страховки!',c:'red'},
     {l:'Без осмотра >30д',v:inspOvr+'',s:'Юридический риск',c:'amb'},
-  ].map(x=>'<div class="met"><div class="ml">'+x.l+'</div><div class="mv '+x.c+'">'+x.v+'</div><div class="ms">'+x.s+'</div></div>').join('');
+  ].map(m=>`<div class="met"><div class="ml">${m.l}</div><div class="mv ${m.c}">${m.v}</div><div class="ms">${m.s}</div></div>`).join('');
 
-  // Таблица должников
-  const debtBody=document.getElementById('debtBody');
-  if(debtBody){
-    const rows=debtors.sort((a,b)=>a.t-b.t);
-    debtBody.innerHTML=rows.map((d,i)=>'<tr><td style="padding:9px 8px;color:#555">'+(i+1)+'</td><td style="padding:9px 8px"><div style="font-weight:600">'+d.n+'</div><div style="font-size:11px;color:#555">'+d.ph+'</div></td><td style="padding:9px 8px;color:#ef4444;font-weight:700">'+ff(d.t)+'</td><td style="padding:9px 8px;color:'+(d.r<-5000?'#ef4444':'#666')+'">'+( d.r<0?ff(d.r):'—')+'</td><td style="padding:9px 8px;color:'+(d.pe<-5000?'#f59e0b':'#666')+'">'+( d.pe<0?ff(d.pe):'—')+'</td><td style="padding:9px 8px;color:'+(d.d<-5000?'#8b5cf6':'#666')+'">'+( d.d<0?ff(d.d):'—')+'</td><td style="padding:9px 8px;color:'+(d.f<-3000?'#6366f1':'#666')+'">'+( d.f<0?ff(d.f):'—')+'</td><td style="padding:9px 8px;font-size:11px;color:#777;font-family:monospace">'+( d.c||'—')+'</td><td style="padding:9px 8px">'+d.ten+'д</td><td style="padding:9px 8px">'+segB(d.seg)+'</td></tr>').join('');
-    const dt=document.getElementById('debt-title');
-    if(dt)dt.textContent='Должников: '+rows.length;
-    const df=document.getElementById('debt-footer');
-    if(df)df.textContent='Данные: '+UPDATED;
-  }
+  // Метрики ряд 2
+  const stCounts={};C.forEach(c=>{stCounts[c.st]=(stCounts[c.st]||0)+1;});
+  document.getElementById('metrics-bot').innerHTML=[
+    {l:'Техосмотр истёк',v:toExp+'',s:'Нарушение ПДД',c:'red'},
+    {l:'В ремонте',v:(stCounts.repair||0)+'',s:`+ ${stCounts.paint||0} малярка + ${stCounts.wash||0} мойка`,c:'amb'},
+    {l:'Тотал (гибель)',v:(stCounts.total||0)+'',s:'Страховые случаи',c:'red'},
+    {l:'Ветераны >1 года',v:D.filter(d=>d.ten>=365).length+'',s:'Костяк парка',c:'grn'},
+  ].map(m=>`<div class="met"><div class="ml">${m.l}</div><div class="mv ${m.c}">${m.v}</div><div class="ms">${m.s}</div></div>`).join('');
 
-  // Автопарк
-  const carBody=document.getElementById('carsBody');
-  if(carBody){
-    const rows=[...C].sort((a,b)=>Math.min(a.od<0?a.od:9999,a.td<0?a.td:9999)-Math.min(b.od<0?b.od:9999,b.td<0?b.td:9999));
-    carBody.innerHTML=rows.map(c=>'<tr style="border-bottom:1px solid #1a1e2d"><td style="padding:9px 8px;font-family:monospace;font-size:12px;font-weight:600;color:#dde1ef">'+c.p+'</td><td style="padding:9px 8px">'+stB(c.st)+'</td><td style="padding:9px 8px;font-size:13px">'+( c.m||'—')+'</td><td style="padding:9px 8px;font-size:12px;color:#888">'+( c.y||'—')+'</td><td style="padding:9px 8px;font-size:12px;color:#777">'+( c.d||'—')+'</td><td style="padding:9px 8px;font-size:12px">'+( c.km>0?c.km.toLocaleString('ru-RU')+' км':'—')+'</td><td style="padding:9px 8px;font-size:12px">'+( c.osago||'—')+'<br>'+dl(c.od)+'</td><td style="padding:9px 8px;font-size:12px">'+( c.to||'—')+'<br>'+dl(c.td)+'</td><td style="padding:9px 8px;font-size:12px;color:'+(c.ins>30?'#ef4444':'#555')+'">'+( c.ins>0?c.ins+'д':'✓')+'</td></tr>').join('');
-  }
+  // Сегменты + статус парка
+  document.getElementById('seg-fleet-grid').innerHTML=`
+    <div class="card">
+      <div class="st">Сегменты (${D.length})</div>
+      ${Object.entries(segs).map(([k,v])=>{const s=SEG[k];const pct=Math.round(v/D.length*100);
+        return`<div class="br"><span class="bt"><span class="dot" style="background:${s.c}"></span>${s.l}</span><div class="bk"><div class="bf" style="width:${pct}%;background:${s.c}"></div></div><span class="bv" style="color:${s.c}">${v}</span></div>`;}).join('')}
+    </div>
+    <div class="card">
+      <div class="st">Статус парка (${C.length})</div>
+      ${Object.entries(ST).filter(([k])=>stCounts[k]).map(([k,s])=>{const v=stCounts[k]||0;const pct=Math.round(v/C.length*100);
+        return`<div class="br"><span class="bt"><span class="dot" style="background:${s.c}"></span>${s.l}</span><div class="bk"><div class="bf" style="width:${pct}%;background:${s.c}"></div></div><span class="bv" style="color:${s.c}">${v}</span></div>`;}).join('')}
+      <div class="sb">${Object.entries(ST).filter(([k])=>stCounts[k]).map(([k,s])=>`<div style="width:${Math.round((stCounts[k]||0)/C.length*100)}%;background:${s.c}"></div>`).join('')}</div>
+    </div>`;
 
-  // Алерты
-  const ac=document.getElementById('alertsCard');
-  if(ac){
-    const top5=debtors.sort((a,b)=>a.t-b.t).slice(0,5);
-    ac.innerHTML='<div class="st">🔴 Критические — сегодня</div>'+
-      (osagoExp?'<div class="al al-r"><div class="at">'+osagoExp+' авто с просроченным ОСАГО</div><div class="as">Открой вкладку Документы</div></div>':'')+
-      (toExp?'<div class="al al-r"><div class="at">'+toExp+' авто с истёкшим техосмотром</div><div class="as">Открой вкладку Документы</div></div>':'')+
-      top5.map(d=>'<div class="al al-r"><div class="at">'+d.n+' — '+ff(Math.abs(d.t))+'</div><div class="as">'+(d.r<0?'Аренда '+ff(Math.abs(d.r))+' · ':'')+( d.pe<0?'Пени '+ff(Math.abs(d.pe)):'')+'  Тел: '+d.ph+'</div></div>').join('')+
-      '<div class="st" style="margin-top:16px">🟡 Предупреждения</div>'+
-      (inspOvr?'<div class="al al-a"><div class="at">'+inspOvr+' водителей без медосмотра >30 дней</div><div class="as">Системная проблема.</div></div>':'')+
-      '<div class="al al-a"><div class="at">Пени: '+fmt(Math.abs(penDebt))+' накоплены по парку</div><div class="as">Растут каждый день.</div></div>'+
-      '<div class="updated">Данные: '+UPDATED+'</div>';
-  }
+  // Критические алерты
+  const top3=debtors.sort((a,b)=>a.t-b.t).slice(0,3);
+  document.getElementById('crit-body').innerHTML=
+    (osagoExp?`<div class="al al-r"><div class="at">${osagoExp} авто с просроченным ОСАГО — выезд запрещён</div><div class="as">Штраф + полная ответственность при ДТП. Вкладка Документы → ОСАГО.</div></div>`:'')+
+    (toExp?`<div class="al al-r"><div class="at">${toExp} авто с истёкшим техосмотром</div><div class="as">Нарушение ПДД при каждой поездке.</div></div>`:'')+
+    top3.map(d=>`<div class="al al-r"><div class="at">${d.n} — долг ${ff(d.t)}</div><div class="as">${d.r<0?'Аренда '+ff(d.r)+' · ':''}${d.pe<0?'Пени '+ff(d.pe):''}  Тел: ${d.ph} · Стаж: ${d.ten}д</div></div>`).join('')+
+    (inspOvr?`<div class="al al-a"><div class="at">${inspOvr} водителей без медосмотра более 30 дней</div><div class="as">Системная проблема.</div></div>`:'')+
+    `<div class="updated">Данные: ${UPDATED}</div>`;
 
-  // Документы
-  _refreshDocs();
-  
-  // Скрываем welcome экран
-  const wel=document.getElementById('t-welcome');
-  if(wel) wel.style.display='none';
-  // Переключаем на Сводку
-  const dash=document.getElementById('t-dash');
-  if(dash) dash.style.display='';
-  document.querySelectorAll('.nb').forEach(b=>b.classList.remove('on'));
-  const firstBtn=document.querySelector('.nb');
-  if(firstBtn) firstBtn.classList.add('on');
-  console.log('✅ Данные обновлены:', D.length, 'водителей,', C.length, 'авто');
+  // Автопарк метрики
+  document.getElementById('fleet-metrics').innerHTML=[
+    {l:'Всего ТС',v:C.length+'',s:`КПД ${kpd}% · ${online} на линии`,c:'grn'},
+    {l:'Вне линии',v:(C.length-online)+'',s:'Ремонт + малярка + мойка',c:'amb'},
+    {l:'Требуют внимания',v:(osagoExp+toExp)+'',s:'Просроченные документы',c:'red'},
+  ].map(m=>`<div class="met"><div class="ml">${m.l}</div><div class="mv ${m.c}">${m.v}</div><div class="ms">${m.s}</div></div>`).join('');
+
+  renderCars('all');
+  refreshDocs();
+  renderDebt();
+  renderAlerts(totalDebt,debtors,osagoExp,toExp,inspOvr,penDebt);
 }
 
-function _refreshDocs(){
+function renderCars(filter){
   const C=CARS;
-  const today=new Date(2026,3,9);
-  function dl(d){if(d>9000)return'—';if(d<0)return'<span style="color:#ef4444;font-weight:700">Просрочено '+Math.abs(d)+'д</span>';if(d<=7)return'<span style="color:#ef4444;font-weight:700">'+d+'д!</span>';if(d<=30)return'<span style="color:#f59e0b;font-weight:600">'+d+'д</span>';return'<span style="color:#555">'+d+'д</span>';}
-  
-  const oc=document.getElementById('osago-card');
-  if(oc){
-    const crit=[...C].filter(c=>c.od<60&&c.od>-9000).sort((a,b)=>a.od-b.od);
-    oc.innerHTML='<div class="st">🔴 ОСАГО — критические ('+crit.length+')</div>'+
-      (crit.length===0?'<div style="color:#555;font-size:13px">Всё в порядке ✓</div>':
-      crit.map(c=>'<div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid #1a1e2d;gap:8px"><div><div style="font-weight:600;font-family:monospace;font-size:13px">'+c.p+'</div><div style="font-size:11px;color:#666;margin-top:2px">'+c.m+' · '+(c.d||'нет водителя')+'</div></div><div style="text-align:right;flex-shrink:0"><div style="font-size:12px;color:#888">'+( c.osago||'—')+'</div>'+dl(c.od)+'</div></div>').join(''));
-  }
-  
-  const tc=document.getElementById('to-card');
-  if(tc){
-    const crit=[...C].filter(c=>c.td<60&&c.td>-9000).sort((a,b)=>a.td-b.td);
-    tc.innerHTML='<div class="st">🔴 Техосмотр — критические ('+crit.length+')</div>'+
-      (crit.length===0?'<div style="color:#555;font-size:13px">Всё в порядке ✓</div>':
-      crit.map(c=>'<div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid #1a1e2d;gap:8px"><div><div style="font-weight:600;font-family:monospace;font-size:13px">'+c.p+'</div><div style="font-size:11px;color:#666;margin-top:2px">'+c.m+' · '+(c.d||'нет водителя')+'</div></div><div style="text-align:right;flex-shrink:0"><div style="font-size:12px;color:#888">'+( c.to||'—')+'</div>'+dl(c.td)+'</div></div>').join(''));
-  }
-  
-  const totCard=document.getElementById('total-card');
-  if(totCard){
-    const tots=C.filter(c=>c.st==='total');
-    totCard.innerHTML='<div class="st">💀 Тотал — '+tots.length+' авто</div>'+
-      (tots.length===0?'<div style="color:#555">Нет</div>':'<div style="display:flex;flex-wrap:wrap;gap:10px">'+tots.map(c=>'<div style="background:#1a1e2d;border-radius:8px;padding:10px 14px"><div style="font-family:monospace;font-weight:700">'+c.p+'</div><div style="font-size:12px;color:#666;margin-top:3px">'+c.m+'</div><div style="font-size:11px;color:#ef4444;font-weight:600;margin-top:4px">ТОТАЛ</div></div>').join('')+'</div>');
-  }
+  let rows=[...C];
+  if(filter==='crit')rows=rows.filter(c=>(c.od<0&&c.od>-9000)||(c.td<0&&c.td>-9000));
+  else if(filter==='repair')rows=rows.filter(c=>c.st==='repair'||c.st==='paint'||c.st==='wash');
+  else if(filter==='total')rows=rows.filter(c=>c.st==='total');
+  else if(filter==='free')rows=rows.filter(c=>c.st==='free');
+  rows.sort((a,b)=>{const ma=Math.min(a.od<0&&a.od>-9000?a.od:9999,a.td<0&&a.td>-9000?a.td:9999);const mb=Math.min(b.od<0&&b.od>-9000?b.od:9999,b.td<0&&b.td>-9000?b.td:9999);return ma-mb;});
+  document.getElementById('carsBody').innerHTML=rows.map(c=>`<tr>
+    <td style="font-family:monospace;font-weight:600;color:#dde1ef">${c.p}</td>
+    <td>${stB(c.st)}</td>
+    <td>${c.m||'—'}</td>
+    <td style="color:#888">${c.y||'—'}</td>
+    <td style="color:#777;font-size:12px">${c.d||'—'}</td>
+    <td style="font-size:12px">${c.km>0?c.km.toLocaleString('ru-RU')+' км':'—'}</td>
+    <td style="font-size:12px">${c.osago||'—'}<br>${dl(c.od)}</td>
+    <td style="font-size:12px">${c.to||'—'}<br>${dl(c.td)}</td>
+    <td style="color:${c.ins>30?'#ef4444':'#555'};font-size:12px">${c.ins>0?c.ins+'д':'✓'}</td>
+  </tr>`).join('');
 }
-</script>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
-<script>
-// ═══════ ДИНАМИКА / СНАПШОТЫ ═══════
-const SNAP_KEY = 'fleetos_snapshots_v1';
-let _dynChart = null;
-let _dynMetric = 'debt';
+function filterCars(f,btn){
+  document.querySelectorAll('#carFilter .fp').forEach(b=>b.classList.remove('on'));
+  if(btn)btn.classList.add('on');
+  renderCars(f);
+}
 
-function _getSnaps(){ try{ return JSON.parse(localStorage.getItem(SNAP_KEY)||'[]'); }catch{ return []; } }
+function refreshDocs(){
+  const C=CARS;
+  const osagoCrit=[...C].filter(c=>c.od<60&&c.od>-9000).sort((a,b)=>a.od-b.od);
+  const toCrit=[...C].filter(c=>c.td<60&&c.td>-9000).sort((a,b)=>a.td-b.td);
+  const tots=C.filter(c=>c.st==='total');
+  document.getElementById('osago-card').innerHTML=`<div class="st">🔴 ОСАГО — критические (${osagoCrit.length})</div>`+
+    (osagoCrit.length===0?'<div style="color:#555;font-size:13px">Всё в порядке ✓</div>':
+    osagoCrit.map(c=>`<div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid #1a1e2d;gap:8px">
+      <div><div style="font-weight:600;font-family:monospace;font-size:13px">${c.p}</div><div style="font-size:11px;color:#666;margin-top:2px">${c.m} · ${c.d||'нет водителя'}</div></div>
+      <div style="text-align:right;flex-shrink:0"><div style="font-size:12px;color:#888">${c.osago||'—'}</div>${dl(c.od)}</div>
+    </div>`).join(''));
+  document.getElementById('to-card').innerHTML=`<div class="st">🔴 Техосмотр — критические (${toCrit.length})</div>`+
+    (toCrit.length===0?'<div style="color:#555;font-size:13px">Всё в порядке ✓</div>':
+    toCrit.map(c=>`<div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid #1a1e2d;gap:8px">
+      <div><div style="font-weight:600;font-family:monospace;font-size:13px">${c.p}</div><div style="font-size:11px;color:#666;margin-top:2px">${c.m} · ${c.d||'нет водителя'}</div></div>
+      <div style="text-align:right;flex-shrink:0"><div style="font-size:12px;color:#888">${c.to||'—'}</div>${dl(c.td)}</div>
+    </div>`).join(''));
+  document.getElementById('total-card').innerHTML=`<div class="st">💀 Тотал — ${tots.length} авто</div>`+
+    (tots.length===0?'<div style="color:#555;font-size:13px">Нет</div>':
+    `<div style="display:flex;flex-wrap:wrap;gap:10px">`+tots.map(c=>`<div style="background:#1a1e2d;border-radius:8px;padding:10px 14px"><div style="font-family:monospace;font-weight:700">${c.p}</div><div style="font-size:12px;color:#666;margin-top:3px">${c.m}</div><div style="font-size:11px;color:#ef4444;font-weight:600;margin-top:4px">ТОТАЛ</div></div>`).join('')+'</div>');
+}
 
-function _saveSnap(){
-  const D=DRIVERS, C=CARS;
-  if(!D.length) return;
-  const today = new Date().toISOString().slice(0,10);
-  const snaps = _getSnaps();
-  const idx = snaps.findIndex(s=>s.date===today);
-  const totalDebt = D.reduce((s,d)=>s+(d.t<0?d.t:0),0);
-  const snap = {
-    date: today,
-    debt: totalDebt,
-    debtors: D.filter(d=>d.t<-100).length,
-    online: C.filter(c=>c.st==='online').length,
-    total: C.length,
-    kpd: Math.round(C.filter(c=>c.st==='online').length/C.length*100),
-    osago: C.filter(c=>c.od<0&&c.od>-9000).length,
-    toExp: C.filter(c=>c.td<0&&c.td>-9000).length,
-    insp: D.filter(d=>d.ins>30).length,
-    segs: {ballast:D.filter(d=>d.seg==='ballast').length, potential:D.filter(d=>d.seg==='potential').length, stable:D.filter(d=>d.seg==='stable').length, star:D.filter(d=>d.seg==='star').length},
-    ts: Date.now()
-  };
-  if(idx>=0) snaps[idx]=snap; else snaps.push(snap);
+function renderDebt(){
+  const D=DRIVERS;
+  const q=(document.getElementById('debtSearch')?.value||'').toLowerCase();
+  const rows=D.filter(d=>d.t<-100).filter(d=>!q||d.n.toLowerCase().includes(q)||(d.c||'').toLowerCase().includes(q)).sort((a,b)=>a.t-b.t);
+  document.getElementById('debt-title').textContent=`Должников: ${rows.length}`;
+  const totalDebt=D.reduce((s,d)=>s+(d.t<0?d.t:0),0);
+  const sumEl=document.getElementById('debt-summary');
+  if(sumEl)sumEl.textContent=`Суммарный долг: ${fmt(Math.abs(totalDebt))} · Аренда: ${fmt(Math.abs(D.reduce((s,d)=>s+(d.r<0?d.r:0),0)))} · Пени: ${fmt(Math.abs(D.reduce((s,d)=>s+(d.pe<0?d.pe:0),0)))}`;
+  document.getElementById('debtBody').innerHTML=rows.map((d,i)=>`<tr>
+    <td style="color:#555">${i+1}</td>
+    <td><div style="font-weight:600">${d.n}</div><div style="font-size:11px;color:#555">${d.ph}</div></td>
+    <td style="color:#ef4444;font-weight:700">${ff(d.t)}</td>
+    <td style="color:${d.r<-5000?'#ef4444':'#666'}">${d.r<0?ff(d.r):'—'}</td>
+    <td style="color:${d.pe<-5000?'#f59e0b':'#666'}">${d.pe<0?ff(d.pe):'—'}</td>
+    <td style="color:${d.d<-5000?'#8b5cf6':'#666'}">${d.d<0?ff(d.d):'—'}</td>
+    <td style="color:${d.f<-3000?'#6366f1':'#666'}">${d.f<0?ff(d.f):'—'}</td>
+    <td style="font-size:11px;color:#777;font-family:monospace">${d.c||'—'}</td>
+    <td>${d.ten}д</td>
+    <td>${segB(d.seg)}</td>
+  </tr>`).join('');
+  const footer=document.getElementById('debt-footer');
+  if(footer)footer.textContent='Данные: '+UPDATED;
+}
+
+function renderAlerts(totalDebt,debtors,osagoExp,toExp,inspOvr,penDebt){
+  const top5=debtors.sort((a,b)=>a.t-b.t).slice(0,5);
+  document.getElementById('alertsCard').innerHTML=
+    `<div class="st">🔴 Критические — сегодня</div>`+
+    (osagoExp?`<div class="al al-r"><div class="at">${osagoExp} авто с просроченным ОСАГО</div><div class="as">Вкладка Документы → ОСАГО</div></div>`:'')+
+    (toExp?`<div class="al al-r"><div class="at">${toExp} авто с истёкшим техосмотром</div><div class="as">Вкладка Документы → Техосмотр</div></div>`:'')+
+    top5.map(d=>`<div class="al al-r"><div class="at">${d.n} — ${ff(Math.abs(d.t))}</div><div class="as">${d.r<0?'Аренда '+ff(Math.abs(d.r))+' · ':''}${d.pe<0?'Пени '+ff(Math.abs(d.pe)):''}  Тел: ${d.ph}</div></div>`).join('')+
+    `<div class="st" style="margin-top:16px">🟡 Предупреждения</div>`+
+    (inspOvr?`<div class="al al-a"><div class="at">${inspOvr} водителей без медосмотра >30 дней</div><div class="as">Системная проблема.</div></div>`:'')+
+    (penDebt<0?`<div class="al al-a"><div class="at">Пени: ${fmt(Math.abs(penDebt))} накоплены по парку</div><div class="as">Растут каждый день.</div></div>`:'')+
+    `<div class="st" style="margin-top:16px">🟢 Возможности</div>`+
+    `<div class="al al-b"><div class="at">${DRIVERS.filter(d=>d.ten>=365).length} ветеранов (>1 года) — удержать приоритет</div><div class="as">Потеря одного = 3-4 мес. замены.</div></div>`+
+    `<div class="al al-b"><div class="at">${DRIVERS.filter(d=>d.t>100).length} водителей с положительным балансом</div><div class="as">Кандидаты на бонусную программу.</div></div>`+
+    `<div class="updated">Данные: ${UPDATED}</div>`;
+}
+
+// ═══════════════════════════════════
+// ДИНАМИКА
+// ═══════════════════════════════════
+const SNAP_KEY='fleetos_snaps_v2';
+let _dynChart=null,_dynMetric='debt';
+
+function getSnaps(){try{return JSON.parse(localStorage.getItem(SNAP_KEY)||'[]');}catch{return[];}}
+
+function saveSnap(){
+  const D=DRIVERS,C=CARS;
+  if(!D.length)return;
+  const today=new Date().toISOString().slice(0,10);
+  const snaps=getSnaps();
+  const idx=snaps.findIndex(s=>s.date===today);
+  const snap={date:today,debt:D.reduce((s,d)=>s+(d.t<0?d.t:0),0),debtors:D.filter(d=>d.t<-100).length,online:C.filter(c=>c.st==='online').length,total:C.length,kpd:C.length?Math.round(C.filter(c=>c.st==='online').length/C.length*100):0,osago:C.filter(c=>c.od<0&&c.od>-9000).length,toExp:C.filter(c=>c.td<0&&c.td>-9000).length,insp:D.filter(d=>d.ins>30).length,ts:Date.now()};
+  if(idx>=0)snaps[idx]=snap;else snaps.push(snap);
   snaps.sort((a,b)=>a.date.localeCompare(b.date));
-  localStorage.setItem(SNAP_KEY, JSON.stringify(snaps.slice(-90)));
-  console.log('Снапшот сохранён:', today, snap);
+  localStorage.setItem(SNAP_KEY,JSON.stringify(snaps.slice(-90)));
 }
 
-function _fmtDebt(n){const a=Math.abs(n);if(a>=1000000)return(n/1000000).toFixed(1)+'М ₽';if(a>=1000)return Math.round(n/1000)+'К ₽';return Math.round(n)+' ₽';}
-function _fmtDate(d){const p=d.split('-');return p[2]+'.'+p[1];}
+function fmtD(n){const a=Math.abs(n);if(a>=1000000)return(n/1000000).toFixed(1)+'М ₽';if(a>=1000)return Math.round(n/1000)+'К ₽';return Math.round(n)+' ₽';}
+function fmtDate(d){const p=d.split('-');return p[2]+'.'+p[1];}
 
-const _MCONF = {
-  debt:    {label:'Дебиторка',     color:'#ef4444', key:s=>Math.abs(s.debt),   fmt:v=>_fmtDebt(-v)},
-  debtors: {label:'Должников',     color:'#f59e0b', key:s=>s.debtors,          fmt:v=>v+' чел.'},
-  kpd:     {label:'КПД %',         color:'#22c55e', key:s=>s.kpd,              fmt:v=>v+'%'},
-  osago:   {label:'ОСАГО просроч.',color:'#8b5cf6', key:s=>s.osago,            fmt:v=>v+' авто'},
+const MCONF={
+  debt:{label:'Дебиторка',color:'#ef4444',key:s=>Math.abs(s.debt),fmt:v=>fmtD(-v)},
+  debtors:{label:'Должников',color:'#f59e0b',key:s=>s.debtors,fmt:v=>v+' чел.'},
+  kpd:{label:'КПД %',color:'#22c55e',key:s=>s.kpd,fmt:v=>v+'%'},
+  osago:{label:'ОСАГО просроч.',color:'#8b5cf6',key:s=>s.osago,fmt:v=>v+' авто'},
 };
 
-function setDynMetric(m, btn){
-  _dynMetric = m;
-  document.querySelectorAll('.dm-btn').forEach(b=>{
-    b.style.background='transparent'; b.style.color='#555'; b.style.borderColor='#1a1e2d';
-  });
-  if(btn){ btn.style.background='rgba(99,102,241,.15)'; btn.style.color='#a5b4fc'; btn.style.borderColor='rgba(99,102,241,.4)'; }
-  _renderDyn();
+function setDynMetric(m,btn){
+  _dynMetric=m;
+  document.querySelectorAll('.dm-btn').forEach(b=>b.classList.remove('on'));
+  if(btn)btn.classList.add('on');
+  renderDyn();
 }
 
-function _renderDynCards(snaps){
-  if(!snaps.length){ document.getElementById('dyn-cards').innerHTML=''; return; }
-  const last=snaps[snaps.length-1], prev=snaps.length>1?snaps[snaps.length-2]:null;
-  function chg(key, inv){
-    if(!prev) return '';
-    const d=last[key]-prev[key]; if(d===0) return '<span style="color:#444">→</span>';
-    const up=d>0; const arr=up?'↑':'↓';
-    const col=inv?(up?'#ef4444':'#22c55e'):(up?'#22c55e':'#ef4444');
-    const val=key==='debt'?_fmtDebt(Math.abs(d)):key==='kpd'?Math.abs(d)+'%':Math.abs(d);
-    return '<span style="color:'+col+'">'+arr+' '+val+'</span>';
-  }
+function renderDyn(){
+  const snaps=getSnaps();
+  const empty=document.getElementById('dyn-empty');
+  const canvas=document.getElementById('dynChart');
+  if(!canvas)return;
+  if(!snaps.length){empty.style.display='';canvas.parentElement.style.display='none';return;}
+  empty.style.display='none';canvas.parentElement.style.display='';
+  // Карточки
+  const last=snaps[snaps.length-1],prev=snaps.length>1?snaps[snaps.length-2]:null;
+  function chg(key,inv){if(!prev)return'';const d=last[key]-prev[key];if(d===0)return'';const up=d>0;const c=inv?(up?'#ef4444':'#22c55e'):(up?'#22c55e':'#ef4444');const val=key==='debt'?fmtD(Math.abs(d)):key==='kpd'?Math.abs(d)+'%':Math.abs(d);return`<span style="color:${c}">${up?'↑':'↓'} ${val}</span>`;}
   document.getElementById('dyn-cards').innerHTML=[
-    {l:'Дебиторка',   v:_fmtDebt(last.debt),    d:chg('debt',true)},
-    {l:'Должников',   v:last.debtors+' чел.',   d:chg('debtors',true)},
-    {l:'КПД парка',   v:last.kpd+'%',           d:chg('kpd',false)},
-    {l:'ОСАГО просроч.',v:last.osago+' авто',   d:chg('osago',true)},
-  ].map(c=>'<div class="met"><div class="ml">'+c.l+'</div><div class="mv">'+c.v+'</div><div class="ms" style="min-height:16px">'+c.d+'</div></div>').join('');
-}
-
-function _renderDynTable(snaps){
+    {l:'Дебиторка',v:fmtD(last.debt),d:chg('debt',true)},
+    {l:'Должников',v:last.debtors+' чел.',d:chg('debtors',true)},
+    {l:'КПД',v:last.kpd+'%',d:chg('kpd',false)},
+    {l:'ОСАГО !',v:last.osago+' авто',d:chg('osago',true)},
+  ].map(c=>`<div class="met"><div class="ml">${c.l}</div><div class="mv">${c.v}</div><div class="ms" style="min-height:16px">${c.d}</div></div>`).join('');
+  // График
+  const m=MCONF[_dynMetric];
+  const labels=snaps.map(s=>fmtDate(s.date));
+  const values=snaps.map(s=>m.key(s));
+  if(_dynChart)_dynChart.destroy();
+  _dynChart=new Chart(canvas,{type:'line',data:{labels,datasets:[{label:m.label,data:values,borderColor:m.color,backgroundColor:m.color+'18',borderWidth:2,pointRadius:snaps.length===1?6:4,pointHoverRadius:7,pointBackgroundColor:m.color,tension:0.35,fill:true}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>m.fmt(ctx.raw),title:ctx=>snaps[ctx[0].dataIndex]?.date.split('-').reverse().join('.')||ctx[0].label}}},scales:{x:{grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'#555',font:{size:11},maxRotation:45,autoSkip:snaps.length>20}},y:{grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'#555',font:{size:11},callback:v=>{if(_dynMetric==='debt')return Math.abs(v)>=1000?Math.round(v/1000)+'К':v;if(_dynMetric==='kpd')return v+'%';return v;}}}}}});
+  document.getElementById('dyn-legend').innerHTML=`<span style="display:inline-flex;align-items:center;gap:6px"><span style="width:12px;height:3px;background:${m.color};border-radius:2px;display:inline-block"></span>${m.label}</span>`;
+  // Таблица
   const rows=[...snaps].reverse().slice(0,60);
   document.getElementById('dyn-tbody').innerHTML=rows.map((s,i)=>{
     const p=rows[i+1];
-    function d(key,inv){
-      if(!p)return'';const diff=s[key]-p[key];if(diff===0)return'';
-      const up=diff>0;const c=inv?(up?'#ef4444':'#22c55e'):(up?'#22c55e':'#ef4444');
-      return' <span style="color:'+c+';font-size:10px">'+(up?'↑':'↓')+Math.abs(diff)+'</span>';
-    }
-    return '<tr style="border-bottom:1px solid #111520">'+
-      '<td style="padding:8px;color:#dde1ef">'+s.date.split('-').reverse().join('.')+'</td>'+
-      '<td style="padding:8px;text-align:right;color:#ef4444">'+_fmtDebt(s.debt)+d('debt',true)+'</td>'+
-      '<td style="padding:8px;text-align:right;color:#dde1ef">'+s.debtors+d('debtors',true)+'</td>'+
-      '<td style="padding:8px;text-align:right;color:#22c55e">'+s.kpd+'%'+d('kpd',false)+'</td>'+
-      '<td style="padding:8px;text-align:right;color:#dde1ef">'+s.online+d('online',false)+'</td>'+
-      '<td style="padding:8px;text-align:right;color:'+(s.osago>0?'#ef4444':'#22c55e')+'">'+s.osago+d('osago',true)+'</td>'+
-      '<td style="padding:8px;text-align:right;color:'+(s.insp>150?'#ef4444':'#f59e0b')+'">'+s.insp+'</td>'+
-    '</tr>';
+    function d(key,inv){if(!p)return'';const diff=s[key]-p[key];if(diff===0)return'';const up=diff>0;const c=inv?(up?'#ef4444':'#22c55e'):(up?'#22c55e':'#ef4444');return` <span style="color:${c};font-size:10px">${up?'↑':'↓'}${Math.abs(diff)}</span>`;}
+    return`<tr style="border-bottom:1px solid #111520">
+      <td style="color:#dde1ef">${s.date.split('-').reverse().join('.')}</td>
+      <td style="text-align:right;color:#ef4444">${fmtD(s.debt)}${d('debt',true)}</td>
+      <td style="text-align:right">${s.debtors}${d('debtors',true)}</td>
+      <td style="text-align:right;color:#22c55e">${s.kpd}%${d('kpd',false)}</td>
+      <td style="text-align:right">${s.online}${d('online',false)}</td>
+      <td style="text-align:right;color:${s.osago>0?'#ef4444':'#22c55e'}">${s.osago}</td>
+      <td style="text-align:right;color:${s.insp>150?'#ef4444':'#f59e0b'}">${s.insp}</td>
+    </tr>`;
   }).join('');
 }
 
-function _renderDyn(){
-  const snaps=_getSnaps();
-  const empty=document.getElementById('dyn-empty');
-  const canvas=document.getElementById('dynChart');
-  if(!canvas) return;
+// ═══════════════════════════════════
+// МЕНЕДЖЕРЫ
+// ═══════════════════════════════════
+let _mgrFilter='all',_mgrHChart=null;
 
-  if(!snaps.length){
-    empty.style.display=''; canvas.parentElement.style.display='none'; return;
-  }
-  empty.style.display='none'; canvas.parentElement.style.display='';
-
-  _renderDynCards(snaps);
-
-  const m=_MCONF[_dynMetric];
-  const labels=snaps.map(s=>_fmtDate(s.date));
-  const values=snaps.map(s=>m.key(s));
-
-  if(_dynChart) _dynChart.destroy();
-  _dynChart=new Chart(canvas,{
-    type:'line',
-    data:{
-      labels,
-      datasets:[{
-        label:m.label, data:values,
-        borderColor:m.color, backgroundColor:m.color+'18',
-        borderWidth:2, pointRadius:snaps.length===1?6:4,
-        pointHoverRadius:7, pointBackgroundColor:m.color,
-        tension:0.35, fill:true
-      }]
-    },
-    options:{
-      responsive:true, maintainAspectRatio:false,
-      plugins:{
-        legend:{display:false},
-        tooltip:{callbacks:{
-          label:ctx=>m.fmt(ctx.raw),
-          title:ctx=>snaps[ctx[0].dataIndex]?.date.split('-').reverse().join('.')||ctx[0].label
-        }}
-      },
-      scales:{
-        x:{grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'#555',font:{size:11},maxRotation:45,autoSkip:snaps.length>20}},
-        y:{grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'#555',font:{size:11},callback:v=>{
-          if(_dynMetric==='debt')return Math.abs(v)>=1000?Math.round(v/1000)+'К':v;
-          if(_dynMetric==='kpd')return v+'%';
-          return v;
-        }}}
-      }
-    }
-  });
-
-  document.getElementById('dyn-legend').innerHTML=
-    '<span style="display:inline-flex;align-items:center;gap:6px">'+
-    '<span style="width:12px;height:3px;background:'+m.color+';border-radius:2px;display:inline-block"></span>'+
-    m.label+'</span>';
-
-  _renderDynTable(snaps);
+function renderManagers(){
+  if(!OPS.length){document.getElementById('mgr-empty').style.display='';document.getElementById('mgr-content').style.display='none';return;}
+  document.getElementById('mgr-empty').style.display='none';document.getElementById('mgr-content').style.display='';
+  const byMgr={};
+  OPS.forEach(op=>{if(!byMgr[op.user])byMgr[op.user]={ops:[],income:0,expense:0,drivers:new Set()};byMgr[op.user].ops.push(op);byMgr[op.user].income+=op.income;byMgr[op.user].expense+=op.expense;byMgr[op.user].drivers.add(op.driver);});
+  const colors=['#6366f1','#22c55e','#f59e0b','#ef4444','#0ea5e9','#8b5cf6'];let ci=0;
+  function fmtM(n){const a=Math.abs(n);if(a>=1000)return Math.round(a/1000)+'К ₽';return Math.round(a)+' ₽';}
+  document.getElementById('mgr-cards').innerHTML=Object.entries(byMgr).map(([name,d])=>{
+    const c=colors[ci++%colors.length];const net=d.income-d.expense;
+    return`<div class="card" style="border-left:3px solid ${c};margin-bottom:0">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+        <div style="width:36px;height:36px;border-radius:50%;background:${c}22;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;color:${c}">${name[0].toUpperCase()}</div>
+        <div><div style="font-weight:600;font-size:14px">${name}</div><div style="font-size:12px;color:#555">${d.ops.length} опер. · ${d.drivers.size} водителей</div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+        <div style="background:#111520;border-radius:8px;padding:8px 10px"><div style="font-size:11px;color:#555;margin-bottom:2px">Приход</div><div style="font-size:15px;font-weight:600;color:#22c55e">${fmtM(d.income)}</div></div>
+        <div style="background:#111520;border-radius:8px;padding:8px 10px"><div style="font-size:11px;color:#555;margin-bottom:2px">Расход</div><div style="font-size:15px;font-weight:600;color:#ef4444">${fmtM(d.expense)}</div></div>
+      </div>
+      <div style="font-size:12px;color:${net>=0?'#22c55e':'#ef4444'}">Сальдо: ${net>=0?'+':''}${fmtM(net)}</div>
+    </div>`;
+  }).join('');
+  // Наличные
+  const cash=OPS.filter(o=>o.opType==='cash');
+  function fmtM(n){const a=Math.abs(n);if(a>=1000)return Math.round(a/1000)+'К ₽';return Math.round(a)+' ₽';}
+  document.getElementById('mgr-cash').innerHTML=cash.length===0?'<div style="color:#555;font-size:13px">Наличных нет</div>':cash.map(o=>`<div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid #1a1e2d;gap:8px"><div><div style="font-size:13px;font-weight:600">${o.driver}</div><div style="font-size:11px;color:#555;margin-top:2px">${o.time} · ${o.user} · ${o.pay}</div>${o.desc?`<div style="font-size:11px;color:#666;margin-top:2px">${o.desc}</div>`:''}</div><div style="font-size:14px;font-weight:700;color:${o.income>0?'#22c55e':'#ef4444'};flex-shrink:0">${o.income>0?'+':'-'}${fmtM(o.income||o.expense)}</div></div>`).join('');
+  // График часов
+  const hours=Array(24).fill(0);OPS.forEach(op=>{const h=parseInt((op.time||'0').split(':')[0])||0;hours[h]++;});
+  const hCanvas=document.getElementById('mgrHourChart');
+  if(hCanvas){if(_mgrHChart)_mgrHChart.destroy();_mgrHChart=new Chart(hCanvas,{type:'bar',data:{labels:hours.map((_,i)=>i+'ч'),datasets:[{data:hours,backgroundColor:'#6366f188',borderColor:'#6366f1',borderWidth:1}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#555',font:{size:9},maxRotation:0,autoSkip:true,maxTicksLimit:8}},y:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#555',font:{size:9}}}}}});}
+  renderMgrOps();
 }
 
-// Переопределяем show чтобы рендерить динамику при переходе на вкладку
-const _origShow = show;
-window.show = function(id, btn){
-  _origShow(id, btn);
-  if(id==='dyn') _renderDyn();
-};
+function filterMgrOps(f,btn){
+  _mgrFilter=f;
+  document.querySelectorAll('#mgr-filter-btns .fp').forEach(b=>b.classList.remove('on'));
+  if(btn)btn.classList.add('on');
+  renderMgrOps();
+}
+
+function renderMgrOps(){
+  function fmtM(n){const a=Math.abs(n);if(a>=1000)return Math.round(a/1000)+'К ₽';return Math.round(a)+' ₽';}
+  const ops=_mgrFilter==='all'?OPS:OPS.filter(o=>o.opType===_mgrFilter);
+  const sorted=[...ops].sort((a,b)=>b.time.localeCompare(a.time));
+  const pc={'Наличные':'#22c55e','Карта алексей':'#f59e0b','Внутренний':'#6366f1','Прочие':'#888'};
+  document.getElementById('mgr-ops-body').innerHTML=sorted.map(op=>`<tr>
+    <td style="font-size:12px;color:#888;white-space:nowrap">${op.time}</td>
+    <td style="font-weight:600">${op.user}</td>
+    <td style="font-size:12px;color:#aaa">${op.driver.split(' ').slice(0,2).join(' ')}</td>
+    <td style="font-size:12px">${op.group}</td>
+    <td style="color:#22c55e;font-weight:600">${op.income>0?'+'+fmtM(op.income):'—'}</td>
+    <td style="color:#ef4444;font-weight:600">${op.expense>0?'-'+fmtM(op.expense):'—'}</td>
+    <td><span style="font-size:11px;padding:2px 7px;border-radius:4px;background:${(pc[op.pay]||'#888')}22;color:${pc[op.pay]||'#888'}">${op.pay}</span></td>
+    <td style="font-size:11px;color:#555;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${op.desc}">${op.desc||'—'}</td>
+  </tr>`).join('');
+}
+
+// ═══════════════════════════════════
+// ИНИЦИАЛИЗАЦИЯ
+// ═══════════════════════════════════
+// При старте показываем welcome screen (данных нет)
+document.getElementById('t-welcome').style.display='';
+document.getElementById('t-dash').style.display='none';
 </script>
-
-
-<script>
-// ═══════ ОПЕРАЦИИ / МЕНЕДЖЕРЫ ═══════
-let OPS = [];
-let _mgrFilter = 'all';
-
-function _parseOps(rows){
-  // Заголовки в строке 0
-  let hi = -1;
-  const cols = {};
-  for(let i = 0; i < Math.min(rows.length, 5); i++){
-    const r = rows[i];
-    for(let j = 0; j < r.length; j++){
-      const v = String(r[j]||'').trim();
-      if(v === 'Дата операции'){ hi = i; cols.date = j; }
-      if(v === 'Время операции') cols.time = j;
-      if(v === 'Водитель') cols.driver = j;
-      if(v === 'Приход') cols.income = j;
-      if(v === 'Расход') cols.expense = j;
-      if(v === 'Группа') cols.group = j;
-      if(v === 'Описание') cols.desc = j;
-      if(v === 'Пользователь') cols.user = j;
-      if(v === 'Способ оплаты') cols.pay = j;
-      if(v === 'Ручная корректировка') cols.manual = j;
-      if(v === 'Раздел баланса') cols.section = j;
-    }
-    if(hi >= 0) break;
-  }
-  if(hi < 0) return [];
-
-  const res = [];
-  for(let i = hi + 1; i < rows.length; i++){
-    const r = rows[i];
-    const user = String(r[cols.user]||'').trim();
-    if(!user || user === 'nan') continue; // только операции с менеджером
-    const driver = String(r[cols.driver]||'').trim();
-    if(!driver || driver === 'nan') continue;
-    const income  = parseFloat(String(r[cols.income]||0).replace(',','.')) || 0;
-    const expense = parseFloat(String(r[cols.expense]||0).replace(',','.')) || 0;
-    const pay     = String(r[cols.pay]||'').trim();
-    const group   = String(r[cols.group]||'').trim();
-    const desc    = String(r[cols.desc]||'').trim().replace('nan','');
-    const time    = String(r[cols.time]||'').trim();
-    const date    = String(r[cols.date]||'').trim();
-
-    // Тип операции для фильтра
-    let opType = 'other';
-    if(pay === 'Наличные' || pay === 'Карта алексей') opType = 'cash';
-    else if(group.includes('Коррекц') || group.includes('Сторно') || desc.includes('Сторно')) opType = 'correction';
-    else if(group.includes('Пени') || group.includes('Штраф') || group.includes('ДТП') || group.includes('Повреждения')) opType = 'penalty';
-
-    res.push({ date, time, driver, income, expense, group, desc, user, pay, opType });
-  }
-  return res;
-}
-
-function _renderManagers(){
-  if(!OPS.length){
-    document.getElementById('mgr-empty').style.display = '';
-    document.getElementById('mgr-content').style.display = 'none';
-    return;
-  }
-  document.getElementById('mgr-empty').style.display = 'none';
-  document.getElementById('mgr-content').style.display = '';
-
-  // Карточки по менеджерам
-  const byMgr = {};
-  OPS.forEach(op => {
-    if(!byMgr[op.user]) byMgr[op.user] = {ops:[], income:0, expense:0, drivers:new Set()};
-    byMgr[op.user].ops.push(op);
-    byMgr[op.user].income += op.income;
-    byMgr[op.user].expense += op.expense;
-    byMgr[op.user].drivers.add(op.driver);
-  });
-
-  const colors = ['#6366f1','#22c55e','#f59e0b','#ef4444','#0ea5e9','#8b5cf6'];
-  let ci = 0;
-  document.getElementById('mgr-cards').innerHTML = Object.entries(byMgr).map(([name, d]) => {
-    const c = colors[ci++ % colors.length];
-    const net = d.income - d.expense;
-    return '<div class="card" style="border-left:3px solid '+c+'">' +
-      '<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">' +
-        '<div style="width:36px;height:36px;border-radius:50%;background:'+c+'22;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;color:'+c+'">'+name[0].toUpperCase()+'</div>' +
-        '<div><div style="font-weight:600;font-size:14px;color:#dde1ef">'+name+'</div>' +
-        '<div style="font-size:12px;color:#555">'+d.ops.length+' опер. · '+d.drivers.size+' водителей</div></div>' +
-      '</div>' +
-      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">' +
-        '<div style="background:#111520;border-radius:8px;padding:8px 10px"><div style="font-size:11px;color:#555;margin-bottom:3px">Приход</div><div style="font-size:15px;font-weight:600;color:#22c55e">'+_fmtM(d.income)+'</div></div>' +
-        '<div style="background:#111520;border-radius:8px;padding:8px 10px"><div style="font-size:11px;color:#555;margin-bottom:3px">Расход</div><div style="font-size:15px;font-weight:600;color:#ef4444">'+_fmtM(d.expense)+'</div></div>' +
-      '</div>' +
-      '<div style="margin-top:8px;font-size:12px;color:'+(net>=0?'#22c55e':'#ef4444')+'">Сальдо: '+(net>=0?'+':'')+_fmtM(net)+'</div>' +
-      '<div style="margin-top:8px">' + _mgrDriverBadges(d.drivers) + '</div>' +
-    '</div>';
-  }).join('');
-
-  // Наличные и переводы
-  const cash = OPS.filter(o => o.opType === 'cash');
-  document.getElementById('mgr-cash').innerHTML = cash.length === 0
-    ? '<div style="color:#555;font-size:13px">Наличных операций нет</div>'
-    : cash.map(o => '<div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid #1a1e2d;gap:8px">' +
-        '<div>' +
-          '<div style="font-size:13px;font-weight:600;color:#dde1ef">'+o.driver+'</div>' +
-          '<div style="font-size:11px;color:#555;margin-top:2px">'+o.time+' · '+o.user+' · '+o.pay+'</div>' +
-          (o.desc ? '<div style="font-size:11px;color:#666;margin-top:2px">'+o.desc+'</div>' : '') +
-        '</div>' +
-        '<div style="font-size:14px;font-weight:700;color:'+(o.income>0?'#22c55e':'#ef4444');+';flex-shrink:0">'+(o.income>0?'+':'-')+_fmtM(o.income||o.expense)+'</div>' +
-      '</div>').join('');
-
-  // График по часам
-  _renderHourChart();
-
-  // Лента
-  _renderMgrOps();
-}
-
-function _mgrDriverBadges(driversSet){
-  return Array.from(driversSet).map(d => {
-    const short = d.split(' ').slice(0,2).join(' ');
-    return '<span style="font-size:10px;padding:2px 7px;border-radius:4px;background:#1a1e2d;color:#888;display:inline-block;margin:2px">'+short+'</span>';
-  }).join('');
-}
-
-function _fmtM(n){ const a=Math.abs(n); if(a>=1000) return Math.round(a/1000)+'К ₽'; return Math.round(a)+' ₽'; }
-
-function _renderHourChart(){
-  const canvas = document.getElementById('mgrHourChart');
-  if(!canvas || typeof Chart === 'undefined') return;
-  const hours = Array(24).fill(0);
-  OPS.forEach(op => {
-    const h = parseInt((op.time||'0').split(':')[0]) || 0;
-    hours[h]++;
-  });
-  if(window._mgrHChart) window._mgrHChart.destroy();
-  window._mgrHChart = new Chart(canvas, {
-    type: 'bar',
-    data: {
-      labels: hours.map((_,i) => i+'ч'),
-      datasets:[{ data: hours, backgroundColor: '#6366f188', borderColor: '#6366f1', borderWidth: 1 }]
-    },
-    options:{
-      responsive:true, maintainAspectRatio:false,
-      plugins:{ legend:{display:false} },
-      scales:{
-        x:{ grid:{color:'rgba(255,255,255,.04)'}, ticks:{color:'#555',font:{size:9},maxRotation:0,autoSkip:true,maxTicksLimit:8} },
-        y:{ grid:{color:'rgba(255,255,255,.04)'}, ticks:{color:'#555',font:{size:9}} }
-      }
-    }
-  });
-}
-
-function filterMgrOps(f, btn){
-  _mgrFilter = f;
-  document.querySelectorAll('#mgr-filter-btns .fp').forEach(b=>{ b.classList.remove('on'); });
-  if(btn) btn.classList.add('on');
-  _renderMgrOps();
-}
-
-function _renderMgrOps(){
-  const ops = _mgrFilter === 'all' ? OPS : OPS.filter(o => o.opType === _mgrFilter);
-  const sorted = [...ops].sort((a,b) => b.time.localeCompare(a.time));
-
-  const payColors = { 'Наличные':'#22c55e', 'Карта алексей':'#f59e0b', 'Внутренний':'#6366f1', 'Прочие':'#888' };
-
-  document.getElementById('mgr-ops-body').innerHTML = sorted.map(op => {
-    const pc = payColors[op.pay] || '#555';
-    return '<tr style="border-bottom:1px solid #111520">' +
-      '<td style="padding:8px;font-size:12px;color:#888;white-space:nowrap">'+op.time+'</td>' +
-      '<td style="padding:8px;font-size:13px;font-weight:600;color:#dde1ef">'+op.user+'</td>' +
-      '<td style="padding:8px;font-size:12px;color:#aaa">'+op.driver.split(' ').slice(0,2).join(' ')+'</td>' +
-      '<td style="padding:8px;font-size:12px;color:#dde1ef">'+op.group+'</td>' +
-      '<td style="padding:8px;font-size:12px;color:#22c55e;font-weight:600">'+(op.income>0?'+'+_fmtM(op.income):'—')+'</td>' +
-      '<td style="padding:8px;font-size:12px;color:#ef4444;font-weight:600">'+(op.expense>0?'-'+_fmtM(op.expense):'—')+'</td>' +
-      '<td style="padding:8px"><span style="font-size:11px;padding:2px 7px;border-radius:4px;background:'+pc+'22;color:'+pc+'">'+op.pay+'</span></td>' +
-      '<td style="padding:8px;font-size:11px;color:#555;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+op.desc+'">'+( op.desc||'—')+'</td>' +
-    '</tr>';
-  }).join('');
-}
-
-// Переопределяем show для менеджеров
-const _origShow2 = window.show;
-window.show = function(id, btn){
-  _origShow2(id, btn);
-  if(id === 'mgr') _renderManagers();
-};
-</script>
-
-<script>
-// Инициализация — показываем welcome если нет данных
-(function(){
-  const hasDr = typeof DRIVERS !== 'undefined' && DRIVERS.length > 0;
-  const hasCr = typeof CARS !== 'undefined' && CARS.length > 0;
-  if(!hasDr && !hasCr){
-    const w = document.getElementById('t-welcome');
-    const d = document.getElementById('t-dash');
-    if(w) w.style.display = '';
-    if(d) d.style.display = 'none';
-  }
-})();
-</script>
-</body></html>
+</body>
+</html>
